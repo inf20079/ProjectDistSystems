@@ -18,7 +18,7 @@ class Listener:
     port: int
 
 
-class SocketPublisher(threading.Thread):
+class UnicastPublisher(threading.Thread):
     def __init__(self):
         """ Class which makes unicast to a list of sockets possible. To add a socket use registerListener. If you want to send a message to all the listeners
         """
@@ -69,7 +69,7 @@ class SocketPublisher(threading.Thread):
 
 
 if __name__ == "__main__":
-    pub = SocketPublisher()
+    pub = UnicastPublisher()
     pub.start()
     pub.registerListener("localhost", 12003)
     i = 0

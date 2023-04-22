@@ -4,8 +4,8 @@ import socket
 from dataclasses import dataclass
 from time import sleep
 
-from middleware.SocketListener import SocketListener
-from middleware.SocketPublisher import SocketPublisher
+from middleware.UnicastListener import UnicastListener
+from middleware.UnicastPublisher import UnicastPublisher
 from middleware.types.MessageTypes import Coordinate
 
 
@@ -18,25 +18,25 @@ class Listener:
 class TestSocketPublisher(unittest.TestCase):
 
     def test_register_listener(self):
-        sp = SocketPublisher()
+        sp = UnicastPublisher()
         sp.registerListener("localhost", 12000)
         self.assertEqual(len(sp.listeners), 1)
         self.assertEqual(sp.listeners[0].host, "localhost")
         self.assertEqual(sp.listeners[0].port, 12000)
 
     def test_append_message(self):
-        sp = SocketPublisher()
+        sp = UnicastPublisher()
         message = "test message"
         sp.appendMessage(message)
         self.assertEqual(sp.message_queue.qsize(), 1)
         self.assertEqual(sp.message_queue.get(), message)
 
     def test_run(self):
-        sp = SocketPublisher()
+        sp = UnicastPublisher()
         sp.registerListener("localhost", 12000)
         message = Coordinate(1, 2)
         sp.appendMessage(message)
-        sl = SocketListener("localhost", 14000)
+        sl = UnicastListener("localhost", 14000)
         sl.start()
         sp.start()
 
@@ -50,7 +50,7 @@ class TestSocketPublisher(unittest.TestCase):
         sp.join()
 
     def test_shutdown(self):
-        sp = SocketPublisher()
+        sp = UnicastPublisher()
         sp.shutdown()
         self.assertTrue(sp.stop_event.is_set())
 

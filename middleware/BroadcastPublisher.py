@@ -20,7 +20,7 @@ class BroadcastPublisher:
 
 
 if __name__ == "__main__":
-    broadcaster = BroadcastPublisher(12000)
+    broadcaster = BroadcastPublisher(12003)
     i = 0
     while True:
         i += 1
