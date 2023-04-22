@@ -7,7 +7,7 @@ from middleware.BroadcastPublisher import BroadcastPublisher
 from middleware.types.JsonCoding import EnhancedJSONEncoder
 
 
-class TestSocketBroadcaster(unittest.TestCase):
+class TestBroadcastPublisher(unittest.TestCase):
     def setUp(self):
         self.port = 12345
         self.broadcaster = BroadcastPublisher(self.port)

@@ -9,38 +9,19 @@ from dataclasses import dataclass, asdict
 from middleware.types.JsonCoding import EnhancedJSONEncoder
 from middleware.types.MessageTypes import Coordinate
 
-T = TypeVar("T")
-
-
-@dataclass
-class Listener:
-    host: str
-    port: int
-
 
 class UnicastPublisher(threading.Thread):
-    def __init__(self):
+    def __init__(self, host: str, port: int):
         """ Class which makes unicast to a list of sockets possible. To add a socket use registerListener. If you want to send a message to all the listeners
         """
         threading.Thread.__init__(self)
-        self.listeners: List[Listener] = []
+        self.host = host
+        self.port = port
         self.message_queue = Queue()
         self.stop_event = threading.Event()
+        self.timeoutevents = 0
 
-    def registerListener(self, host: str, port: int):
-        """Register a new listener.
-
-        :param host: IPv4 Adress
-        :type host: str
-        :param port: Port
-        :type port: int
-        :param message_type: Dataclass type with implemented fromDict method
-        :type message_type: dataclass
-        """
-        listener = Listener(host, port)
-        self.listeners.append(listener)
-
-    def appendMessage(self, message: Type[T]):
+    def appendMessage(self, message):
         """Append a message to the queue."""
         self.message_queue.put(message)
 
@@ -51,27 +32,27 @@ class UnicastPublisher(threading.Thread):
                 break
             if not self.message_queue.empty():
                 message = self.message_queue.get()
-                for listener in self.listeners:
-                    unreachable = []
-                    try:
-                        message_json = json.dumps(message, cls=EnhancedJSONEncoder).encode()
-                        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                            s.connect((listener.host, listener.port))
-                            s.sendall(message_json)
-                    except ConnectionRefusedError:
-                        print("Failed to establish connection removing socket host (ConnectionRefusedError)")
-                        unreachable.append(listener)
-                        pass
-                self.listeners = [listener for listener in self.listeners if listener not in unreachable]
+
+                try:
+                    message_json = json.dumps(message, cls=EnhancedJSONEncoder).encode()
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                        s.connect((self.host, self.port))
+                        s.sendall(message_json)
+                except ConnectionRefusedError:
+                    print("Failed to establish connection trying again in 0.5s  (ConnectionRefusedError)")
+                    sleep(0.5)
+                    self.timeoutevents += 1
+            if self.timeoutevents >= 5:
+                raise ConnectionRefusedError("Failed to establish connection 5 times. Host not reachable.")
 
     def shutdown(self):
         self.stop_event.set()
 
 
 if __name__ == "__main__":
-    pub = UnicastPublisher()
+    pub = UnicastPublisher("localhost", 12004)
     pub.start()
-    pub.registerListener("localhost", 12003)
+
     i = 0
     while True:
         i += 1

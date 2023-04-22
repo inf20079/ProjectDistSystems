@@ -40,10 +40,10 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
 
     @staticmethod
     def parseMessage(message):
-        """ Parses JSON string into dataclasses defined in MessageTypes
+        """ Parses JSON dict into dataclasses defined in MessageTypes
 
-        :param message: JSON string
-        :type message: str
+        :param message: JSON dict
+        :type message: dict
         :return: MessageType type
         :rtype: dataclass
         """
