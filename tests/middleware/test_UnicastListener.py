@@ -6,7 +6,7 @@ import json
 from middleware.UnicastListener import UnicastListener
 
 
-class TestSocketListener(unittest.TestCase):
+class TestUnicastListener(unittest.TestCase):
 
     def test_listen_and_parse(self):
         # create a new SocketListener instance

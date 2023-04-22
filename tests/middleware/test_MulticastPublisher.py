@@ -15,7 +15,7 @@ class Listener:
     port: int
 
 
-class TestSocketPublisher(unittest.TestCase):
+class TestMulticastPublisher(unittest.TestCase):
 
     def test_register_listener(self):
         sp = MulticastPublisher()
