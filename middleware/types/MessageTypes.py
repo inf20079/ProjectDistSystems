@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List, Tuple
 
 
 @dataclass(frozen=True)
@@ -27,7 +28,7 @@ class Coordinate:
 class Message:
     senderID: int
     receiverID: int
-    term: int
+    term: int  # the term of the current leader
 
     @classmethod
     def fromDict(cls, dict):
@@ -46,19 +47,23 @@ class Message:
 
 @dataclass(frozen=True)
 class AddEntryMessage(Message):
-    commit: bool
-    success: bool  # false rejects, true if logs match
-    newLogEntry: str
-    lastLogIndex: int
+    commitIndex: int  # The index of the highest log entry that the leader knows to be committed
+    prevLogIndex: int  # The index of the log entry immediately preceding the new entries being appended
+    prevLogTerm: int  # The term of the prevLogIndex
+    entries: List[Tuple[int, str]]  # A list of new log entries to be appended to the log
 
     def __repr__(self):
-        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.commit=}, {self.success=}, {self.lastLogIndex=}, {self.newLogEntry=})"
+        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.commitIndex=}, {self.prevLogIndex=}, {self.prevLogTerm=}, {self.entries=})"
+
 
 @dataclass(frozen=True)
-class LeaderResponseMessage(Message):
+class AddEntriesResponse(Message):
+    success: bool
+    conflictIndex: int
+    conflictTerm: int
 
     def __repr__(self):
-        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=})"
+        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.success=}, {self.conflictIndex=}, {self.conflictTerm=})"
 
 
 @dataclass(frozen=True)

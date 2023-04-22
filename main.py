@@ -15,11 +15,11 @@ def main():
     addEntryMessage = AddEntryMessage(
         senderID=0,
         receiverID=1,
-        term=0,
-        commit=True,
-        success=True,
-        newLogEntry="{}",
-        lastLogIndex=-1
+        term=3,
+        commitIndex=4,
+        prevLogIndex=4,
+        prevLogTerm=2,
+        entries=[(5, "command_1"), (6, "command_2"), (7, "command_3")]
     )
 
     follower.onMessage(addEntryMessage)

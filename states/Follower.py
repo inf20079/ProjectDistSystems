@@ -8,8 +8,8 @@ class Follower(Voter):
         self.timeout = timeout
         self.timeoutTime = self.nextTimeout()
 
-    def onAddEntry(self, message):
-        print("onAddEntry")
+    def onAddEntries(self, message):
+        print("onAddEntries")
 
         self.timeoutTime = self.nextTimeout()
         # logic...

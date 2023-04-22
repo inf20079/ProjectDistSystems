@@ -26,7 +26,7 @@ class State:
 
         if isinstance(message, AddEntryMessage):
             if isinstance(self, Follower):
-                return self.onAddEntry(message)
+                return self.onAddEntries(message)
             print("instance not a follower")
         elif isinstance(message, RequestVoteMessage):
             if isinstance(self, Voter):
@@ -36,7 +36,7 @@ class State:
             if isinstance(self, Candidate):
                 return self.onVoteResponseReceived(message)
             print("instance not a candidate")
-        elif isinstance(self, LeaderResponseMessage):
+        elif isinstance(self, AddEntriesResponse):
             if isinstance(self, Leader):
                 return self.onResponseReceived(message)
             print("instance not a leader")

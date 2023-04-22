@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from middleware.types.MessageTypes import AddEntryMessage
 from states.State import State
 
 
@@ -18,5 +19,11 @@ class Leader(State):
         # logic...
         return self, None
 
-    def sendHeartBeat(self):
+    def sendHeartbeat(self):
+        message = AddEntryMessage(
+            senderID=self.node.id,
+            receiverID=None,
+            term=self.node.currentTerm,
+
+        )
         pass
