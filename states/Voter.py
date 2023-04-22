@@ -1,4 +1,4 @@
-from middleware.types.MessageTypes import AddEntryMessage, ResponseVoteMessage
+from middleware.types.MessageTypes import AddEntriesRequest, ResponseVoteMessage
 from states.State import State
 
 
@@ -11,7 +11,7 @@ class Voter(State):
         print("onVoteRequestReceived")
 
         if (self.lastVote is None and
-                message is AddEntryMessage and
+                message is AddEntriesRequest and
                 message.lastLogIndex >= self.node.lastLogIndex):
             self.lastVote = message.senderID
             self.sendVoteResponseMessage(message, True)

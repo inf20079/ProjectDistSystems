@@ -24,7 +24,7 @@ class State:
             # ToDo: Tell the sender that they're behind
             pass
 
-        if isinstance(message, AddEntryMessage):
+        if isinstance(message, AddEntriesRequest):
             if isinstance(self, Follower):
                 return self.onAddEntries(message)
             print("instance not a follower")

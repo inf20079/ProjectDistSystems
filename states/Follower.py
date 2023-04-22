@@ -9,7 +9,7 @@ class Follower(Voter):
         self.timeoutTime = self.nextTimeout()
 
     def onAddEntries(self, message):
-        print("onAddEntries")
+        print("(Follower) onAddEntries")
 
         self.timeoutTime = self.nextTimeout()
         # logic...

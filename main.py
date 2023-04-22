@@ -1,5 +1,5 @@
 from control.TrafficArea import TrafficArea
-from middleware.types.MessageTypes import AddEntryMessage
+from middleware.types.MessageTypes import AddEntriesRequest
 from node.Node import Node
 from states.Follower import Follower
 from states.Leader import Leader
@@ -12,7 +12,7 @@ def main():
     leader = Node(0, Leader(), "")
     follower = Node(1, Follower(), "")
 
-    addEntryMessage = AddEntryMessage(
+    addEntryMessage = AddEntriesRequest(
         senderID=0,
         receiverID=1,
         term=3,

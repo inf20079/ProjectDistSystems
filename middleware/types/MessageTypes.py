@@ -46,7 +46,7 @@ class Message:
 
 
 @dataclass(frozen=True)
-class AddEntryMessage(Message):
+class AddEntriesRequest(Message):
     commitIndex: int  # The index of the highest log entry that the leader knows to be committed
     prevLogIndex: int  # The index of the log entry immediately preceding the new entries being appended
     prevLogTerm: int  # The term of the prevLogIndex

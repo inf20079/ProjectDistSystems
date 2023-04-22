@@ -5,15 +5,15 @@ class Node:
     def __init__(self, id, state, log):
         self.id = id
         self.state = state
-        self.log = log
+        self.log = log  # logEntry = { 'term': 2, 'command': 'do something }
 
+        self.commitIndex = 0
         self.currentTerm = 0
-
-        self.lastLogIndex = 0
 
         self.state.setNode(self)
 
     def sendMessageBroadcast(self, message):
+        print("(Node) sendMessageBroadcast")
         # ToDo: Broadcast
         pass
 
