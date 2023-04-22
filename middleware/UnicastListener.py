@@ -12,6 +12,7 @@ class UnicastListener(AbstractSocketListener):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((self.host, self.port))
         sock.listen(5)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return sock
 
     def run(self):
@@ -41,7 +42,7 @@ class UnicastListener(AbstractSocketListener):
 
 
 if __name__ == "__main__":
-    sub = UnicastListener("localhost", 12003)
+    sub = UnicastListener("localhost", 12004)
     sub.start()
     while True:
         print(sub.popMessage())
