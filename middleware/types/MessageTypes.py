@@ -25,10 +25,8 @@ class Coordinate:
 
 @dataclass(frozen=True)
 class Message:
-    status: str
-    sender_id: int
-    receiver_id: int
-    data = None
+    senderID: int
+    receiverID: int
     term: int
 
 
@@ -36,8 +34,8 @@ class Message:
 class AddEntryMessage(Message):
     commit: bool
     success: bool  # false rejects, true if logs match
-    last_log_index: int
-    new_log_entry = None
+    newLogEntry = None
+    lastLogIndex: int
 
 
 @dataclass(frozen=True)
