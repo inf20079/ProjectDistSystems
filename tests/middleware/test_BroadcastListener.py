@@ -1,6 +1,7 @@
 import unittest
 import socket
 import json
+from time import sleep
 
 from middleware.BroadcastListener import BroadcastListener
 from middleware.types.MessageTypes import Coordinate
@@ -20,10 +21,12 @@ class TestBroadcastListener(unittest.TestCase):
         sock.sendto(data, ("<broadcast>", self.port))
         sock.close()
 
+        sleep(0.1)
+
         result = self.listener.popMessage()
         expected_result = Coordinate(1, 2)
 
-        self.assertEqual(result, expected_result)
+        self.assertEqual(expected_result, result)
 
         self.listener.shutdown()
         self.listener.join()

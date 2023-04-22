@@ -24,7 +24,7 @@ class SocketPublisher(threading.Thread):
         """
         threading.Thread.__init__(self)
         self.listeners: List[Listener] = []
-        self.message_queue: Queue[T] = Queue()
+        self.message_queue = Queue()
         self.stop_event = threading.Event()
 
     def registerListener(self, host: str, port: int):
@@ -64,16 +64,14 @@ class SocketPublisher(threading.Thread):
                         pass
                 self.listeners = [listener for listener in self.listeners if listener not in unreachable]
 
-
     def shutdown(self):
         self.stop_event.set()
-
 
 
 if __name__ == "__main__":
     pub = SocketPublisher()
     pub.start()
-    pub.registerListener("localhost", 12001)
+    pub.registerListener("localhost", 12003)
     i = 0
     while True:
         i += 1

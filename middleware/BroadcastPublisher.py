@@ -20,9 +20,10 @@ class BroadcastPublisher:
 
 
 if __name__ == "__main__":
-    broadcaster = BroadcastPublisher(12001)
+    broadcaster = BroadcastPublisher(12000)
     i = 0
     while True:
         i += 1
         broadcaster.broadcast(Coordinate(i, 2))
+        print(i)
         sleep(0.2)

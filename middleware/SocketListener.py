@@ -4,8 +4,6 @@ import threading
 from queue import Queue
 from time import sleep
 
-import select
-
 from middleware.types.MessageTypes import Coordinate
 
 
@@ -36,6 +34,10 @@ class SocketListener(threading.Thread):
             client_thread = threading.Thread(target=self.listenToClient, args=(client_socket,))
             client_thread.start()
             self.client_threads.append(client_thread)
+
+        # Clean up client threads
+        for thread in self.client_threads:
+            thread.join()
 
     def listenToClient(self, client_socket):
         while True:
@@ -68,7 +70,7 @@ class SocketListener(threading.Thread):
 
 
 if __name__ == "__main__":
-    sub = SocketListener("localhost", 12001)
+    sub = SocketListener("localhost", 12003)
     sub.start()
     while True:
         print(sub.popMessage())
