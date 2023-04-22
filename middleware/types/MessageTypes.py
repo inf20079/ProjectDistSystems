@@ -41,7 +41,7 @@ class Message:
         return cls(**dict)
 
     def __repr__(self):
-        return f"Message({self.status=}, {self.sender_id=}, {self.receiver_id=}, {self.data=}, {self.term=})"
+        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=})"
 
 
 @dataclass(frozen=True)
@@ -51,91 +51,29 @@ class AddEntryMessage(Message):
     newLogEntry: str
     lastLogIndex: int
 
-    @classmethod
-    def fromDict(cls, dict):
-        """ object creation from dict
-
-        :param dict: coordinate dataclass as dict
-        :type dict:
-        :return:
-        :rtype: coordinate dataclass
-        """
-        return cls(**dict)
-
     def __repr__(self):
-        return f"Message({self.status=}, {self.sender_id=}, {self.receiver_id=}, {self.data=}, {self.term=}, {self.commit=}, {self.success=}, {self.last_log_index=}, {self.new_log_entry=})"
+        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.commit=}, {self.success=}, {self.lastLogIndex=}, {self.newLogEntry=})"
 
 @dataclass(frozen=True)
 class LeaderResponseMessage(Message):
 
-    @classmethod
-    def fromDict(cls, dict):
-        """ object creation from dict
-
-        :param dict: coordinate dataclass as dict
-        :type dict:
-        :return:
-        :rtype: coordinate dataclass
-        """
-        return cls(**dict)
-
     def __repr__(self):
-        return f"Message({self.status=}, {self.sender_id=}, {self.receiver_id=}, {self.data=}, {self.term=})"
+        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=})"
 
 
 @dataclass(frozen=True)
 class VoteMessage(Message):
-
     vote = None  # None to request, 1 vote yes, 0 vote no
 
-    @classmethod
-    def fromDict(cls, dict):
-        """ object creation from dict
-
-        :param dict: coordinate dataclass as dict
-        :type dict:
-        :return:
-        :rtype: coordinate dataclass
-        """
-        return cls(**dict)
-
     def __repr__(self):
-        return f"Message({self.status=}, {self.sender_id=}, {self.receiver_id=}, {self.data=}, {self.term=}, {self.vote=})"
+        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.vote=})"
 
 
 @dataclass(frozen=True)
 class RequestVoteMessage(VoteMessage):
     vote = None
 
-    @classmethod
-    def fromDict(cls, dict):
-        """ object creation from dict
-
-        :param dict: coordinate dataclass as dict
-        :type dict:
-        :return:
-        :rtype: coordinate dataclass
-        """
-        return cls(**dict)
-
-    def __repr__(self):
-        return f"Message({self.status=}, {self.sender_id=}, {self.receiver_id=}, {self.data=}, {self.term=}, {self.vote=})"
-
 
 @dataclass(frozen=True)
 class ResponseVoteMessage(VoteMessage):
     vote: int  # 1 vote yes, 0 vote no
-
-    @classmethod
-    def fromDict(cls, dict):
-        """ object creation from dict
-
-        :param dict: coordinate dataclass as dict
-        :type dict:
-        :return:
-        :rtype: coordinate dataclass
-        """
-        return cls(**dict)
-
-    def __repr__(self):
-        return f"Message({self.status=}, {self.sender_id=}, {self.receiver_id=}, {self.data=}, {self.term=}, {self.vote=})"

@@ -16,7 +16,7 @@ class Node:
     def sendMessageBroadcast(self, message):
         # ToDo: Broadcast
         pass
-    
+
     def sendMessageMulticast(self, message):
         # ToDo: Multicast
         pass
