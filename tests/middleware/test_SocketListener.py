@@ -3,14 +3,14 @@ import socket
 import time
 import json
 
-from middleware.SocketListener import SocketListener
+from middleware.UnicastListener import UnicastListener
 
 
 class TestSocketListener(unittest.TestCase):
 
     def test_listen_and_parse(self):
         # create a new SocketListener instance
-        listener = SocketListener('localhost', 8000)
+        listener = UnicastListener('localhost', 8000)
 
         # start the listener thread
         listener.start()
