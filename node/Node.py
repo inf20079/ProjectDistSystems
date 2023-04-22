@@ -13,6 +13,10 @@ class Node:
 
         self.state.setNode(self)
 
+    def sendMessageBroadcast(self, message):
+        # ToDo: Broadcast
+        pass
+    
     def sendMessageMulticast(self, message):
         # ToDo: Multicast
         pass
