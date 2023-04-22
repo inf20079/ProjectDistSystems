@@ -1,8 +1,9 @@
+from states.Voter import Voter
 
 
 class Candidate(Voter):
-    def setNode(self, server):
-        super().setNode(self, server)
+    def setNode(self, node):
+        super().setNode(self, node)
         self.votes = {}
         self.startElection()
 
@@ -10,6 +11,8 @@ class Candidate(Voter):
         return self, None
 
     def onVoteResponseReceived(self, message):
+        print("onVoteResponseReceived")
+
         # logic ...
         return self, None
 

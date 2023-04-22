@@ -1,3 +1,4 @@
+from states.Voter import Voter
 
 
 class Follower(Voter):
@@ -8,5 +9,8 @@ class Follower(Voter):
         self.timeoutTime = self.nextTimeout()
 
     def onAddEntry(self, message):
+        print("onAddEntry")
+
         self.timeoutTime = self.nextTimeout()
         # logic...
+        return self, None
