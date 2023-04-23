@@ -48,7 +48,10 @@ class BroadcastInterface(AbstractSocketListener):
 
             # Read the data from the socket if available
             if r_list:
-                data, address = self.socket.recvfrom(1024)
+                try:
+                    data, address = self.socket.recvfrom(1024)
+                except OSError:
+                    break
                 if not data:
                     continue
                 message = json.loads(data.decode())
@@ -59,7 +62,10 @@ class BroadcastInterface(AbstractSocketListener):
                 if not self.publish_queue.empty():
                     message = self.publish_queue.get()
                     message_json_string = json.dumps(message, cls=EnhancedJSONEncoder)
-                    self.socket.sendto(message_json_string.encode(), ("<broadcast>", self.port))
+                    try:
+                        self.socket.sendto(message_json_string.encode(), ("<broadcast>", self.port))
+                    except OSError:
+                        break
 
         self.socket.close()
 

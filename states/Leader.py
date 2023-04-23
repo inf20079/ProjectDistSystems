@@ -18,9 +18,6 @@ class Leader(State):
         print("(Leader) setNode")
         super().setNode(node)
 
-        self.nextIndex = {peer: (self.node.lastLogIndex() + 1) for peer in node.peers}
-        self.matchIndex = {peer: 0 for peer in node.peers}
-
         # Upon election: send initial heartbeat
         self.sendHeartbeat()
 
@@ -30,8 +27,14 @@ class Leader(State):
             target=self.watchHeartbeatTimeout
         ).start()
 
+
     def onResponseReceived(self, message: AppendEntriesResponse):
         print("(Leader) onResponseReceived")
+
+        if message.senderID not in self.nextIndex:
+            self.nextIndex[message.senderID] = self.node.lastLogIndex() + 1
+        if message.senderID not in self.matchIndex:
+            self.matchIndex[message.senderID] = 0
 
         if not message.success:
             self.nextIndex[message.senderID] -= 1

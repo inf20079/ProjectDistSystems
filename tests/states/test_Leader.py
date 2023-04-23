@@ -1,17 +1,18 @@
 import unittest
 
-from node.Node import Node, LogEntry
+from node.Node import Node
 from states.Leader import Leader
-from middleware.types.MessageTypes import AppendEntriesResponse
+from middleware.types.MessageTypes import AppendEntriesResponse, LogEntry
 
 
 class TestLeader(unittest.TestCase):
     def setUp(self):
         self.leader = Leader()
-        self.leaderNode = Node(0, self.leader, None, [1, 2],
+        self.leaderNode = Node(0, self.leader, [1, 2],
                                [LogEntry(0, "a"), LogEntry(0, "b"), LogEntry(1, "c")])
 
     def tearDown(self):
+        self.leaderNode.shutdown()
         self.leader.shutdown()
 
     def test_onResponseReceived_Successful(self):

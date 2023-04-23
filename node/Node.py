@@ -1,3 +1,5 @@
+import threading
+import time
 from socket import gethostname, gethostbyname
 from typing import Any
 
@@ -36,9 +38,30 @@ class Node:
         self.commitIndex = 0
         self.currentTerm = 0
 
-        self.peers = {} if peers is None else peers
+        self.peers = peers if peers is not None else {}
+
+        self.isPeriodicDiscoveryActive = True
+        self.discoveryInterval = 5
+        threading.Thread(
+            target=self.periodicDiscovery
+        )
 
         self.state.setNode(self)
+
+    def pollMessages(self):
+        message = self.unicastList.popMessage()
+        while message is not None:
+            if isinstance(message, RequestDiscover):
+                self.onDiscoveryRequest(message)
+            else:
+                self.onRaftMessage(message)
+            message = self.unicastList.popMessage()
+
+    def periodicDiscovery(self):
+        while self.isPeriodicDiscoveryActive:
+            self.sendDiscovery()
+            time.sleep(self.discoveryInterval)
+
 
     def lastLogIndex(self):
         return len(self.log) - 1 if len(self.log) > 0 else -1
@@ -62,8 +85,8 @@ class Node:
             self.state = state
             state.setNode(self)
 
-    def onMessage(self, message):
-        state, response = self.state.onMessage(message)
+    def onRaftMessage(self, message):
+        state, response = self.state.onRaftMessage(message)
         self.manuallySwitchState(state)
 
         return state, response
@@ -94,3 +117,6 @@ class Node:
         self.broadcastInterface.join()
         self.unicastList.shutdown()
         self.unicastList.join()
+
+        self.isPeriodicDiscoveryActive = False
+        # ToDo: State.shutdown

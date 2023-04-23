@@ -17,13 +17,14 @@ class TestCandidate(unittest.TestCase):
 
     def tearDown(self):
         print("tearDown")
+        self.candidateNode.shutdown()
         self.candidateNode.state.shutdown()
 
     def test_onVoteResponseReceived_higherTerm(self):
         # Test case where response message has a higher term than the candidate's current term
 
         message = ResponseVoteMessage(senderID=1, receiverID=0, term=2, voteGranted=False)
-        state, response = self.candidateNode.onMessage(message)
+        state, response = self.candidateNode.onRaftMessage(message)
 
         self.assertTrue(isinstance(state, Follower))
         self.assertEqual(state, self.candidateNode.state)
@@ -33,7 +34,7 @@ class TestCandidate(unittest.TestCase):
         # Test case where the vote is granted
 
         message = ResponseVoteMessage(senderID=1, receiverID=0, term=self.candidateNode.currentTerm, voteGranted=True)
-        state, response = self.candidateNode.onMessage(message)
+        state, response = self.candidateNode.onRaftMessage(message)
 
         self.assertEqual(self.candidateNode.state.votesReceived, 2)
         self.assertEqual(state, self.candidateNode.state)
@@ -43,7 +44,7 @@ class TestCandidate(unittest.TestCase):
         # Test case where the vote is not granted
 
         message = ResponseVoteMessage(senderID=1, receiverID=0, term=self.candidateNode.currentTerm, voteGranted=False)
-        state, response = self.candidateNode.onMessage(message)
+        state, response = self.candidateNode.onRaftMessage(message)
 
         self.assertEqual(self.candidateNode.state.votesReceived, 1)
         self.assertEqual(state, self.candidateNode.state)
@@ -54,10 +55,10 @@ class TestCandidate(unittest.TestCase):
         message1 = ResponseVoteMessage(senderID=1, receiverID=0, term=self.candidateNode.currentTerm, voteGranted=True)
         message2 = ResponseVoteMessage(senderID=2, receiverID=0, term=self.candidateNode.currentTerm, voteGranted=False)
         message3 = ResponseVoteMessage(senderID=3, receiverID=0, term=self.candidateNode.currentTerm, voteGranted=True)
-        self.candidateNode.onMessage(message1)
-        self.candidateNode.onMessage(message2)
+        self.candidateNode.onRaftMessage(message1)
+        self.candidateNode.onRaftMessage(message2)
 
-        state, response = self.candidateNode.onMessage(message3)
+        state, response = self.candidateNode.onRaftMessage(message3)
 
         self.assertEqual(state, self.candidateNode.state)
         self.assertTrue(isinstance(state, Leader))

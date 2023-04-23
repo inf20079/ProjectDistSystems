@@ -1,5 +1,5 @@
-from control.TrafficArea import TrafficArea
-from middleware.types.MessageTypes import AppendEntriesRequest
+import time
+
 from node.Node import Node
 from states.Follower import Follower
 from states.Leader import Leader
@@ -11,6 +11,12 @@ def main():
 
     leader = Node(0, Leader(), None)
     #follower = Node(1, Follower(), None)
+
+    node = Node(0, Follower())
+
+    while True:
+        node.pollMessages()
+        time.sleep(0.01)
 
 
 if __name__ == '__main__':
