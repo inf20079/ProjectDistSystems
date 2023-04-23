@@ -15,6 +15,9 @@ class Voter(State):
     def setNode(self, node):
         super().setNode(node)
         self.resetElectionTimeout()
+        threading.Thread(
+            target=self.watchElectionTimeout
+        ).start()
 
     def onVoteRequestReceived(self, message: RequestVoteMessage):
         print("(Voter) onVoteRequestReceived")
@@ -45,9 +48,12 @@ class Voter(State):
         )
 
     def watchElectionTimeout(self):
-        while time.time() < self.nextElectionTimeout:
-            time.sleep(0.01)
-        self.onElectionTimeouted()
+        while True:
+            while time.time() >= self.nextElectionTimeout:  # wait for reset
+                time.sleep(0.01)
+            while time.time() < self.nextElectionTimeout:  # count down
+                time.sleep(0.01)
+            self.onElectionTimeouted()
 
 
     def onElectionTimeouted(self):
@@ -56,7 +62,3 @@ class Voter(State):
     def resetElectionTimeout(self):
         print("resetElectionTimeout")
         self.nextElectionTimeout = time.time() + self.electionTimeout
-
-        threading.Thread(
-            target=self.watchElectionTimeout
-        ).start()
