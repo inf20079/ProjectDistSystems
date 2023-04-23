@@ -1,3 +1,4 @@
+import time
 import unittest
 from unittest.mock import MagicMock
 from middleware.types.MessageTypes import RequestVoteMessage
@@ -41,4 +42,4 @@ class TestVoter(unittest.TestCase):
     def test_resetElectionTimeout(self):
         self.voter.nextElectionTimeout = 100
         self.voter.resetElectionTimeout()
-        self.assertEqual(self.voter.nextElectionTimeout, 0)
+        self.assertAlmostEquals(self.voter.nextElectionTimeout, time.time() + self.voter.electionTimeout)

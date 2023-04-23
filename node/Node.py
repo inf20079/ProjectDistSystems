@@ -36,7 +36,7 @@ class Node:
         return self.log[-1].term if len(self.log) > 0 else 0
 
     def sendMessageBroadcast(self, message):
-        print("(Node) sendMessageBroadcast")
+        # print("(Node) sendMessageBroadcast")
         # ToDo: Broadcast
         pass
 
@@ -49,13 +49,15 @@ class Node:
         pass
 
     def manuallySwitchState(self, state):
-        self.state = state
-        state.setNode(self)
+        if self.state is not state:
+            print("manuallySwitchState")
+            self.state.shutdown()
+            self.state = state
+            state.setNode(self)
 
     def onMessage(self, message):
         state, response = self.state.onMessage(message)
-        self.state = state
-        state.setNode(self)
+        self.manuallySwitchState(state)
 
         return state, response
 

@@ -11,6 +11,9 @@ class TestLeader(unittest.TestCase):
         self.leaderNode = Node(0, self.leader, None, [1, 2],
                                [LogEntry(0, "a"), LogEntry(0, "b"), LogEntry(1, "c")])
 
+    def tearDown(self):
+        self.leader.shutdown()
+
     def test_onResponseReceived_Successful(self):
         message = AppendEntriesResponse(
             senderID=1,

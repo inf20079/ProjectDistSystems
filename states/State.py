@@ -31,14 +31,15 @@ class State:
         elif isinstance(message, AppendEntriesResponse):
             if isinstance(self, Leader):
                 state, response = self.onResponseReceived(message)
-            print("instance not a leader")
+            else:
+                print("instance not a leader")
         elif isinstance(message, RequestVoteMessage):
-            if isinstance(self, Voter):
-                state, response = self.onVoteRequestReceived(message)
+            state, response = self.onVoteRequestReceived(message)
         elif isinstance(message, ResponseVoteMessage):
             if isinstance(self, Candidate):
                 state, response = self.onVoteResponseReceived(message)
-            print("instance not a candidate")
+            else:
+                print("instance not a candidate")
 
         # If RPC request or response contains term T > currentTerm:
         # convert to follower
@@ -49,6 +50,8 @@ class State:
         return state, response
 
     def onAppendEntries(self, message: AppendEntriesRequest):
+        """To be overriden by children"""
+
         print("(State) onAddEntries")
 
         # Reply false if message.term < currentTerm
@@ -92,12 +95,23 @@ class State:
         response = self.generateAppendEntriesResponse(message, True)
         return self, response
 
+    def onVoteRequestReceived(self, message: RequestVoteMessage):
+        """To be implemented by Voter and Leader"""
+
     def generateAppendEntriesResponse(self, message, success):
         return AppendEntriesResponse(
             senderID=self.node.id,
             receiverID=message.senderID,
             term=self.node.currentTerm,
             success=success
+        )
+
+    def generateVoteResponseMessage(self, message, vote: bool):
+        return ResponseVoteMessage(
+            senderID=self.node.id,
+            receiverID=message.senderID,
+            term=message.term,
+            voteGranted=vote
         )
 
     def nextTimeout(self):

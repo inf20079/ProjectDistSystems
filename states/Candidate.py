@@ -7,6 +7,8 @@ from states.Voter import Voter
 class Candidate(Voter):
 
     def setNode(self, node):
+        print("(Candidate) setNode")
+
         super().setNode(node)
         self.votesReceived = 0
         self.startElection()
@@ -18,9 +20,10 @@ class Candidate(Voter):
     def onVoteResponseReceived(self, message: ResponseVoteMessage):
         print("(Candidate) onVoteResponseReceived")
 
+        print(self.votesReceived)
+
         # Check if the message's term is greater than the candidate's current term
         if message.term > self.node.currentTerm:
-            self.onMessageWithGreaterTerm(message)
             print("(Candidate) onVoteResponseReceived: higher term")
             return Follower(), None
 
@@ -38,6 +41,7 @@ class Candidate(Voter):
         return self, None
 
     def onElectionTimeouted(self):
+        # print("(Candidate) onElectionTimeouted")
         self.startElection()
 
     def startElection(self):
@@ -65,3 +69,4 @@ class Candidate(Voter):
         )
 
         self.node.sendMessageBroadcast(requestVoteMessage)
+

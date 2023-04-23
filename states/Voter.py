@@ -11,6 +11,7 @@ class Voter(State):
     def __init__(self):
         self.votedFor = None
         self.electionTimeout = random.randrange(150, 300) / 100  # in milliseconds
+        self.electionActive = True
 
     def setNode(self, node):
         super().setNode(node)
@@ -18,6 +19,7 @@ class Voter(State):
         threading.Thread(
             target=self.watchElectionTimeout
         ).start()
+        print("(Voter) setNode done")
 
     def onVoteRequestReceived(self, message: RequestVoteMessage):
         print("(Voter) onVoteRequestReceived")
@@ -39,26 +41,21 @@ class Voter(State):
 
         return self, self.generateVoteResponseMessage(message, True)
 
-    def generateVoteResponseMessage(self, message, vote: bool):
-        return ResponseVoteMessage(
-            senderID=self.node.id,
-            receiverID=message.senderID,
-            term=message.term,
-            voteGranted=vote
-        )
-
     def watchElectionTimeout(self):
-        while True:
-            while time.time() >= self.nextElectionTimeout:  # wait for reset
+        while self.electionActive:
+            while time.time() >= self.nextElectionTimeout and self.electionActive:  # wait for reset
                 time.sleep(0.01)
-            while time.time() < self.nextElectionTimeout:  # count down
+            while time.time() < self.nextElectionTimeout and self.electionActive:  # count down
                 time.sleep(0.01)
             self.onElectionTimeouted()
-
 
     def onElectionTimeouted(self):
         """Must be implemented in children"""
 
     def resetElectionTimeout(self):
-        print("resetElectionTimeout")
+        # print("resetElectionTimeout")
         self.nextElectionTimeout = time.time() + self.electionTimeout
+
+    def shutdown(self):
+        print("Voter shutdown")
+        self.electionActive = False
