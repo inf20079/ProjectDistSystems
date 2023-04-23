@@ -14,6 +14,9 @@ class TestVoter(unittest.TestCase):
         self.voter.node.lastLogIndex.return_value = 9
         self.voter.node.currentTerm = 1
 
+    def tearDown(self):
+        self.voter.shutdown()
+
     def test_onVoteRequestReceived_votedFor_is_None(self):
         message = RequestVoteMessage(senderID=1, receiverID=0, term=1, lastLogIndex=9, lastLogTerm=1)
         state, response = self.voter.onMessage(message)

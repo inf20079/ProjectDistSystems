@@ -21,8 +21,6 @@ class Leader(State):
         # Upon election: send initial heartbeat
         self.sendHeartbeat()
 
-        print("a")
-
         threading.Thread(
             target=self.watchHeartbeatTimeout
         ).start()
@@ -82,7 +80,8 @@ class Leader(State):
                 time.sleep(0.01)
             while time.time() < self.nextHeartbeatTimeout and self.heartbeatActive:  # count down
                 time.sleep(0.01)
-            self.sendHeartbeat()
+            if self.heartbeatActive:
+                self.sendHeartbeat()
 
     def resetHeartbeatTimeout(self):
         print("resetHeartbeatTimeout")

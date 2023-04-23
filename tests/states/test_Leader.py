@@ -13,7 +13,6 @@ class TestLeader(unittest.TestCase):
 
     def tearDown(self):
         self.leaderNode.shutdown()
-        self.leader.shutdown()
 
     def test_onResponseReceived_Successful(self):
         message = AppendEntriesResponse(

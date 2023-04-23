@@ -10,7 +10,7 @@ class Voter(State):
 
     def __init__(self):
         self.votedFor = None
-        self.electionTimeout = random.randrange(150, 300) / 100  # in milliseconds
+        self.electionTimeout = random.randrange(150, 300) / 1000
         self.electionActive = True
 
     def setNode(self, node):
@@ -47,7 +47,8 @@ class Voter(State):
                 time.sleep(0.01)
             while time.time() < self.nextElectionTimeout and self.electionActive:  # count down
                 time.sleep(0.01)
-            self.onElectionTimeouted()
+            if self.electionActive:
+                self.onElectionTimeouted()
 
     def onElectionTimeouted(self):
         """Must be implemented in children"""
@@ -57,5 +58,5 @@ class Voter(State):
         self.nextElectionTimeout = time.time() + self.electionTimeout
 
     def shutdown(self):
-        print("Voter shutdown")
+        print("(Voter) shutdown")
         self.electionActive = False

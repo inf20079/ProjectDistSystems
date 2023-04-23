@@ -11,14 +11,12 @@ from states.Leader import Leader
 class TestCandidate(unittest.TestCase):
 
     def setUp(self):
-        self.candidateNode = Node(0, Candidate())
-        self.candidateNode.peers = [1, 2, 3, 4]
+        self.candidateNode = Node(0, Candidate(), [1, 2, 3, 4])
         self.candidateNode.state.electionTimeout = 100
 
     def tearDown(self):
         print("tearDown")
         self.candidateNode.shutdown()
-        self.candidateNode.state.shutdown()
 
     def test_onVoteResponseReceived_higherTerm(self):
         # Test case where response message has a higher term than the candidate's current term

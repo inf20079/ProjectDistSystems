@@ -88,7 +88,7 @@ class Node:
 
     def manuallySwitchState(self, state):
         if self.state is not state:
-            print("manuallySwitchState")
+            # print("manuallySwitchState")
             self.state.shutdown()
             self.state = state
             state.setNode(self)
@@ -117,6 +117,8 @@ class Node:
         self.sendMessageUnicast(unicast)
 
     def shutdown(self):
+        self.state.shutdown()
+
         self.multicastPub.shutdown()
         self.multicastPub.join()
         self.unicastPub.shutdown()
@@ -127,4 +129,3 @@ class Node:
         self.unicastList.join()
 
         self.isPeriodicDiscoveryActive = False
-        # ToDo: State.shutdown

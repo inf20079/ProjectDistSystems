@@ -12,6 +12,7 @@ class Candidate(Voter):
 
         if len(self.node.peers) == 0:
             node.manuallySwitchState(Leader())
+            return
 
         self.votesReceived = 0
         self.startElection()
