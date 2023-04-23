@@ -5,12 +5,15 @@ from states.Follower import Follower
 from states.Leader import Leader
 
 
+def createCluster(nodeCount = 3):
+    for i in range(nodeCount):
+        Node(i, Follower())
+
 def main():
     # testarea = TrafficArea(2, 3, 4)
     # print(testarea.get_position(2))
 
-    leader = Node(0, Leader(), None)
-    #follower = Node(1, Follower(), None)
+    createCluster(3)
 
 
 if __name__ == '__main__':
