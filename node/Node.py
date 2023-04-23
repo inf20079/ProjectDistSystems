@@ -4,17 +4,17 @@ from typing import List
 
 class Node:
 
-    def __init__(self, id, state):
+    def __init__(self, id, state, peers=None, log=None):
         self.id = id
         self.state = state
-        self.log: [LogEntry] = []
+        self.log: [LogEntry] = [] if log is None else log
 
         self.commitIndex = 0
         self.currentTerm = 0
 
-        self.state.setNode(self)
+        self.peers = {} if peers is None else peers
 
-        self.peers = {}
+        self.state.setNode(self)
         # ToDo: Discover peers.
 
     def lastLogIndex(self):

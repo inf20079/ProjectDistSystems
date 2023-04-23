@@ -7,26 +7,47 @@ from states.State import State
 class Leader(State):
 
     def __init__(self):
-        self.nextIndexes = {}
-        self.matchIndexes = {}
+        self.nextIndex = {}  # for each server, index of the next log entry to send to that server
+        self.matchIndex = {}  # for each server, index of highest log entry known to be replicated on server
 
     def setNode(self, node):
         print("(Leader) setNode")
         super().setNode(node)
 
-        self.nextIndexes = {peer: len(node.log) for peer in node.peers}
-        self.matchIndexes = {peer: 0 for peer in node.peers}
+        self.nextIndex = {peer: (self.node.lastLogIndex() + 1) for peer in node.peers}
+        self.matchIndex = {peer: 0 for peer in node.peers}
 
         # Upon election: send initial heartbeat
         self.sendHeartbeat()
 
     def onResponseReceived(self, message: AppendEntriesResponse):
-        print("onResponseReceived")
+        print("(Leader) onResponseReceived")
 
-        if (message.success):
-            self.matchIndexes[message.senderID]
+        if not message.success:
+            self.nextIndex[message.senderID] -= 1
 
-        return self, None
+            previousIndex = max(0, self.nextIndex[message.senderID] - 1)
+            previous = self.node.log[previousIndex]
+            current = self.node.log[self.nextIndex[message.senderID]]
+
+            appendEntry = AppendEntriesRequest(
+                senderID=self.node.id,
+                receiverID=message.senderID,
+                term=self.node.currentTerm,
+                commitIndex=self.node.commitIndex,
+                prevLogIndex=previousIndex,
+                prevLogTerm=previous.term,
+                entries=[current]
+            )
+            return self, appendEntry
+        else:
+            self.nextIndex[message.senderID] += 1
+            print(self.nextIndex[message.senderID])
+
+            if self.nextIndex[message.senderID] > self.node.lastLogIndex():
+                self.nextIndex[message.senderID] = self.node.lastLogIndex()
+
+            return self, None
 
     def sendHeartbeat(self):
         print("(Leader) sendHeartbeat")
