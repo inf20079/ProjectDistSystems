@@ -28,7 +28,7 @@ class State:
 
         if isinstance(message, AppendEntriesRequest):
             state, response = self.onAppendEntries(message)
-        elif isinstance(self, AppendEntriesResponse):
+        elif isinstance(message, AppendEntriesResponse):
             if isinstance(self, Leader):
                 state, response = self.onResponseReceived(message)
             print("instance not a leader")

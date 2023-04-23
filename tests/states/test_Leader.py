@@ -8,7 +8,7 @@ from middleware.types.MessageTypes import AppendEntriesResponse
 class TestLeader(unittest.TestCase):
     def setUp(self):
         self.leader = Leader()
-        self.leaderNode = Node(0, self.leader, [1, 2],
+        self.leaderNode = Node(0, self.leader, None, [1, 2],
                                [LogEntry(0, "a"), LogEntry(0, "b"), LogEntry(1, "c")])
 
     def test_onResponseReceived_Successful(self):

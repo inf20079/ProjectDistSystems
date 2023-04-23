@@ -7,7 +7,6 @@ from time import sleep
 import select
 
 from middleware.AbstractSocketListener import AbstractSocketListener
-from middleware.types.MessageTypes import Coordinate
 
 
 class BroadcastListener(AbstractSocketListener):

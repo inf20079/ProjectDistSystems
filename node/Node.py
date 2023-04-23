@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import List
+import socket
 
 
 class Node:
 
-    def __init__(self, id, state, peers=None, log=None):
+    def __init__(self, id, state, startPort=None, peers=None, log=None):
         self.id = id
         self.state = state
         self.log: [LogEntry] = [] if log is None else log
@@ -15,6 +15,18 @@ class Node:
         self.peers = {} if peers is None else peers
 
         self.state.setNode(self)
+
+        from middleware.BroadcastListener import BroadcastListener
+        from middleware.BroadcastPublisher import BroadcastPublisher
+        from middleware.UnicastListener import UnicastListener
+        from middleware.UnicastPublisher import UnicastPublisher
+
+        if startPort is not None:
+            localAddress = socket.gethostbyname(socket.gethostname())
+            self.broadcastListener = BroadcastListener(startPort + id * 4 + 0)
+            self.broadcastPublisher = BroadcastPublisher(startPort + id * 4 + 1)
+            self.unicastListener = UnicastListener(localAddress, startPort + id * 4 + 2)
+            self.unicastPublisher = UnicastPublisher(localAddress, startPort + id * 4 + 3)
         # ToDo: Discover peers.
 
     def lastLogIndex(self):
