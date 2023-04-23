@@ -18,11 +18,11 @@ class State:
         from states.Leader import Leader
         from states.Voter import Voter
 
-        if (message.term > self.node.currentTerm):
-            self.onMessageWithGreaterTerm(message)
-        elif (message.term < self.node.currentTerm):
-            # ToDo: Tell the sender that they're behind
-            pass
+        # if (message.term > self.node.currentTerm):
+        #    self.onMessageWithGreaterTerm(message)
+        # elif (message.term < self.node.currentTerm):
+        #   # ToDo: Tell the sender that they're behind
+        #    pass
 
         if isinstance(message, AppendEntriesRequest):
             if isinstance(self, Follower):
@@ -44,10 +44,8 @@ class State:
         print("something went wrong")
         return self, None
 
-
     def onMessageWithGreaterTerm(self, message):
         self.node.currentTerm = message.term
-
 
     def onLeaderTimeout(self, message):
         """Called when leader timeout was reached"""

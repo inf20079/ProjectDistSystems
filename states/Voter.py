@@ -1,36 +1,46 @@
-from middleware.types.MessageTypes import AppendEntriesRequest, ResponseVoteMessage, RequestVoteMessage
+import random
+
+from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage
 from states.State import State
 
 
 class Voter(State):
 
     def __init__(self):
-        self.lastVote = None
-        self.electionTimeout = 0
+        self.votedFor = None
+        self.currElectionTimeout = 0
+        self.maxElectionTimeout = random.randrange(150, 300)  # in milliseconds
 
     def onVoteRequestReceived(self, message: RequestVoteMessage):
-        print("onVoteRequestReceived")
+        print("(Voter) onVoteRequestReceived")
+        # If the candidate has already voted for someone else in this term, reject the vote
+        if self.votedFor is not None and self.votedFor != message.senderID:
+            print("(Voter) onVoteRequestReceived: candidate has already voted")
+            return self, self.generateVoteResponseMessage(message, False)
 
-        if (self.lastVote is None and
-                message is AppendEntriesRequest and
-                message.lastLogIndex >= self.node.lastLogIndex):
-            self.lastVote = message.senderID
-            self.sendVoteResponseMessage(message, True)
-        else:
-            self.sendVoteResponseMessage(message, False)
+        # If the candidate's log is at least as up-to-date as the voter's log, reject the vote
+        if (len(self.node.log) == 0 and message.lastLogIndex == -1) or \
+                len(self.node.log) > 0 and \
+                (
+                        self.node.log[-1].term > message.lastLogTerm or
+                        (self.node.log[-1].term == message.lastLogTerm and len(
+                            self.node.log) - 1 > message.lastLogIndex)
+                ):
+            print("(Voter) onVoteRequestReceived: candidate's log at least as up-to-date as voter's log")
+            return self, self.generateVoteResponseMessage(message, False)
 
-        return self, None
+        self.votedFor = message.senderID
+        self.resetElectionTimeout()
 
-    def sendVoteResponseMessage(self, message, vote: bool):
-        voteResponse = ResponseVoteMessage(
+        return self, self.generateVoteResponseMessage(message, True)
+
+    def generateVoteResponseMessage(self, message, vote: bool):
+        return ResponseVoteMessage(
             senderID=self.node.id,
             receiverID=message.senderID,
             term=message.term,
             voteGranted=vote
         )
-        self.node.sendResponseMessage(voteResponse)
-
 
     def resetElectionTimeout(self):
-        # ToDo
-        pass
+        self.currElectionTimeout = 0
