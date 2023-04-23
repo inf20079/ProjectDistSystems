@@ -56,7 +56,7 @@ class Candidate(Voter):
         print("(Candidate) startElection")
 
         # Reset the election timeout
-        self.resetElectionTimeout()
+        self.recurringProcedure.resetTimeout()
 
         # Increment the current term and vote for self
         self.node.currentTerm += 1

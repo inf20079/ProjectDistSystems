@@ -43,6 +43,5 @@ class TestVoter(unittest.TestCase):
         self.assertIsNone(self.voter.votedFor)
 
     def test_resetElectionTimeout(self):
-        self.voter.nextElectionTimeout = 100
-        self.voter.resetElectionTimeout()
-        self.assertAlmostEquals(self.voter.nextElectionTimeout, time.time() + self.voter.electionTimeout)
+        self.voter.recurringProcedure.resetTimeout()
+        self.assertAlmostEquals(self.voter.recurringProcedure.nextTimeout, time.time() + self.voter.recurringProcedure.timeout)

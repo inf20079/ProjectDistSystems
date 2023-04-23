@@ -3,6 +3,7 @@ import threading
 import time
 
 from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage
+from node.RecurringProcedure import RecurringProcedure
 from states.State import State
 
 
@@ -12,13 +13,11 @@ class Voter(State):
         self.votedFor = None
         self.electionTimeout = random.randrange(150, 300) / 1000
         self.electionActive = True
+        self.recurringProcedure = RecurringProcedure(self.electionTimeout, self.onElectionTimeouted)
 
     def setNode(self, node):
         super().setNode(node)
-        self.resetElectionTimeout()
-        threading.Thread(
-            target=self.watchElectionTimeout
-        ).start()
+        self.recurringProcedure.start()
         print("(Voter) setNode done")
 
     def onVoteRequestReceived(self, message: RequestVoteMessage):
@@ -37,26 +36,13 @@ class Voter(State):
             return self, self.generateVoteResponseMessage(message, False)
 
         self.votedFor = message.senderID
-        self.resetElectionTimeout()
+        self.recurringProcedure.resetTimeout()
 
         return self, self.generateVoteResponseMessage(message, True)
-
-    def watchElectionTimeout(self):
-        while self.electionActive:
-            while time.time() >= self.nextElectionTimeout and self.electionActive:  # wait for reset
-                time.sleep(0.01)
-            while time.time() < self.nextElectionTimeout and self.electionActive:  # count down
-                time.sleep(0.01)
-            if self.electionActive:
-                self.onElectionTimeouted()
 
     def onElectionTimeouted(self):
         """Must be implemented in children"""
 
-    def resetElectionTimeout(self):
-        # print("resetElectionTimeout")
-        self.nextElectionTimeout = time.time() + self.electionTimeout
-
     def shutdown(self):
         print("(Voter) shutdown")
-        self.electionActive = False
+        self.recurringProcedure.shutdown()

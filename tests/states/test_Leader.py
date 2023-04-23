@@ -8,8 +8,8 @@ from middleware.types.MessageTypes import AppendEntriesResponse, LogEntry
 class TestLeader(unittest.TestCase):
     def setUp(self):
         self.leader = Leader()
-        self.leaderNode = Node(0, self.leader, [1, 2],
-                               [LogEntry(0, "a"), LogEntry(0, "b"), LogEntry(1, "c")])
+        self.leaderNode = Node(0, self.leader, peers=[1, 2],
+                               log=[LogEntry(0, "a"), LogEntry(0, "b"), LogEntry(1, "c")])
 
     def tearDown(self):
         self.leaderNode.shutdown()

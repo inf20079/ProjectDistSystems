@@ -3,6 +3,7 @@ import time
 from collections import defaultdict
 
 from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse, RequestVoteMessage
+from node.RecurringProcedure import RecurringProcedure
 from states.State import State
 
 
@@ -13,6 +14,7 @@ class Leader(State):
         self.matchIndex = {}  # for each server, index of highest log entry known to be replicated on server
         self.heartbeatTimeout = 0.1
         self.heartbeatActive = True
+        self.recurringProcedure = RecurringProcedure(self.heartbeatTimeout, self.sendHeartbeat)
 
     def setNode(self, node):
         print("(Leader) setNode")
@@ -20,10 +22,7 @@ class Leader(State):
 
         # Upon election: send initial heartbeat
         self.sendHeartbeat()
-
-        threading.Thread(
-            target=self.watchHeartbeatTimeout
-        ).start()
+        self.recurringProcedure.start()
 
 
     def onResponseReceived(self, message: AppendEntriesResponse):
@@ -72,24 +71,12 @@ class Leader(State):
             entries=[(5, "command_1"), (6, "command_2"), (7, "command_3")]
         )
         self.node.sendMessageBroadcast(message)
-        self.resetHeartbeatTimeout()
+        self.recurringProcedure.resetTimeout()
 
-    def watchHeartbeatTimeout(self):
-        while self.heartbeatActive:
-            while time.time() >= self.nextHeartbeatTimeout and self.heartbeatActive:  # wait for reset
-                time.sleep(0.01)
-            while time.time() < self.nextHeartbeatTimeout and self.heartbeatActive:  # count down
-                time.sleep(0.01)
-            if self.heartbeatActive:
-                self.sendHeartbeat()
-
-    def resetHeartbeatTimeout(self):
-        print("resetHeartbeatTimeout")
-        self.nextHeartbeatTimeout = time.time() + self.heartbeatTimeout
 
     def onVoteRequestReceived(self, message: RequestVoteMessage):
         return self, self.generateVoteResponseMessage(message, False)
 
     def shutdown(self):
         print("(Leader) shutdown")
-        self.heartbeatActive = False
+        self.recurringProcedure.shutdown()

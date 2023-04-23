@@ -117,6 +117,3 @@ class State:
     def shutdown(self):
         """To be overriden"""
 
-    def nextTimeout(self):
-        self.currentTime = time.time()
-        return self.currentTime + random.randrange(self.timeout, 2 * self.timeout)

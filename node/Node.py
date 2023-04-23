@@ -12,12 +12,11 @@ from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Mem
     
 class Node:
 
-    def __init__(self, id, state, peers=None, log=None):
+    def __init__(self, id, state, ipAddress=None, broadcastPort=None, unicastPort=None, peers=None, log=None):
         # middleware
-        hostname = gethostname()
-        self.ipAddress = gethostbyname(hostname)
-        self.broadcastPort = 12004
-        self.unicastPort = 12005
+        self.ipAddress = ipAddress or gethostbyname(gethostname())
+        self.broadcastPort = broadcastPort or 12004
+        self.unicastPort = unicastPort or 12005
         ## Interface
         self.broadcastInterface = BroadcastInterface(self.broadcastPort)
         self.broadcastInterface.start()
