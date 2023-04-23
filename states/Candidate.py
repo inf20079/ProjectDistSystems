@@ -1,4 +1,4 @@
-from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage
+from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage, AppendEntriesRequest
 from states.Follower import Follower
 from states.Leader import Leader
 from states.Voter import Voter
@@ -10,6 +10,10 @@ class Candidate(Voter):
         super().setNode(node)
         self.votesReceived = 0
         self.startElection()
+
+    def onAppendEntries(self, message: AppendEntriesRequest):
+        state, response = super().onAppendEntries(message)
+        return Follower(), response
 
     def onVoteResponseReceived(self, message: ResponseVoteMessage):
         print("(Candidate) onVoteResponseReceived")

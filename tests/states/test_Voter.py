@@ -11,6 +11,7 @@ class TestVoter(unittest.TestCase):
         self.voter = Voter()
         self.voter.node = MagicMock()
         self.voter.node.lastLogIndex.return_value = 9
+        self.voter.node.currentTerm = 1
 
     def test_onVoteRequestReceived_votedFor_is_None(self):
         message = RequestVoteMessage(senderID=1, receiverID=0, term=1, lastLogIndex=9, lastLogTerm=1)

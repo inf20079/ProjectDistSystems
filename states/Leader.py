@@ -17,6 +17,7 @@ class Leader(State):
         self.nextIndexes = {peer: len(node.log) for peer in node.peers}
         self.matchIndexes = {peer: 0 for peer in node.peers}
 
+        # Upon election: send initial heartbeat
         self.sendHeartbeat()
 
     def onResponseReceived(self, message: AppendEntriesResponse):
