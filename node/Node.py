@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+from typing import List
 
 
 class Node:
@@ -5,7 +7,7 @@ class Node:
     def __init__(self, id, state):
         self.id = id
         self.state = state
-        self.log = []  # logEntry = [( 2: 'do something'), ...]
+        self.log: [LogEntry] = []
 
         self.commitIndex = 0
         self.currentTerm = 0
@@ -16,7 +18,7 @@ class Node:
         # ToDo: Discover peers.
 
     def lastLogIndex(self):
-        return len(self.log)-1 if len(self.log) > 0 else -1
+        return len(self.log) - 1 if len(self.log) > 0 else -1
 
     def lastLogTerm(self):
         return self.log[-1].term if len(self.log) > 0 else 0
@@ -39,3 +41,9 @@ class Node:
         self.state = state
 
         return state, response
+
+
+@dataclass(frozen=True)
+class LogEntry:
+    term: int
+    action: str
