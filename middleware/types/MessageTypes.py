@@ -90,11 +90,44 @@ class Member:
     host: str
     port: int
 
+    @classmethod
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        return cls(**dict)
+
 @dataclass(frozen=True)
 class RequestDiscover:
     member: Member  # origin of the request
+
+    @classmethod
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        return cls(**dict)
 
 @dataclass(frozen=True)
 class ResponseDiscover:
     member: Member  # origin of the response
     memberList: Set[Member]  # List of known members
+
+    @classmethod
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        return cls(**dict)

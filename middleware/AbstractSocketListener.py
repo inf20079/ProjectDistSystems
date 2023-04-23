@@ -60,7 +60,7 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
         except TypeError:
             pass
         try:
-            return VoteMessage.fromDict(message)
+            return AppendEntriesResponse.fromDict(message)
         except TypeError:
             pass
         try:
@@ -69,6 +69,18 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
             pass
         try:
             return ResponseVoteMessage.fromDict(message)
+        except TypeError:
+            pass
+        try:
+            return Member.fromDict(message)
+        except TypeError:
+            pass
+        try:
+            return RequestDiscover.fromDict(message)
+        except TypeError:
+            pass
+        try:
+            return ResponseDiscover.fromDict(message)
         except TypeError:
             pass
 
