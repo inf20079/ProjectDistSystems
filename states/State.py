@@ -28,6 +28,10 @@ class State:
             if isinstance(self, Follower):
                 return self.onAppendEntries(message)
             print("instance not a follower")
+        elif isinstance(self, AppendEntriesResponse):
+            if isinstance(self, Leader):
+                return self.onResponseReceived(message)
+            print("instance not a leader")
         elif isinstance(message, RequestVoteMessage):
             if isinstance(self, Voter):
                 return self.onVoteRequestReceived(message)
@@ -36,10 +40,7 @@ class State:
             if isinstance(self, Candidate):
                 return self.onVoteResponseReceived(message)
             print("instance not a candidate")
-        elif isinstance(self, AppendEntriesResponse):
-            if isinstance(self, Leader):
-                return self.onResponseReceived(message)
-            print("instance not a leader")
+
 
         print("something went wrong")
         return self, None

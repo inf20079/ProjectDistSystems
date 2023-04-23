@@ -13,20 +13,17 @@ class Voter(State):
 
     def onVoteRequestReceived(self, message: RequestVoteMessage):
         print("(Voter) onVoteRequestReceived")
-        # If the candidate has already voted for someone else in this term, reject the vote
+
+        # If the voter has already voted for someone else in this term, reject the vote
         if self.votedFor is not None and self.votedFor != message.senderID:
             print("(Voter) onVoteRequestReceived: candidate has already voted")
             return self, self.generateVoteResponseMessage(message, False)
 
-        # If the candidate's log is at least as up-to-date as the voter's log, reject the vote
-        if (len(self.node.log) == 0 and message.lastLogIndex == -1) or \
-                len(self.node.log) > 0 and \
-                (
-                        self.node.log[-1].term > message.lastLogTerm or
-                        (self.node.log[-1].term == message.lastLogTerm and len(
-                            self.node.log) - 1 > message.lastLogIndex)
-                ):
-            print("(Voter) onVoteRequestReceived: candidate's log at least as up-to-date as voter's log")
+        # votedFor is None or message.senderID
+
+        # If the candidate's log is less up-to-date as the voter's log, reject the vote
+        if message.lastLogIndex < self.node.lastLogIndex():
+            print("(Voter) onVoteRequestReceived: candidate's log less up-to-date as voter's log")
             return self, self.generateVoteResponseMessage(message, False)
 
         self.votedFor = message.senderID
