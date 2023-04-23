@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Tuple, Set
 
+from node.Node import LogEntry
+
 
 @dataclass(frozen=True)
 class Coordinate:
@@ -50,7 +52,7 @@ class AppendEntriesRequest(Message):
     commitIndex: int  # The index of the highest log entry that the leader knows to be committed
     prevLogIndex: int  # The index of the log entry immediately preceding the new entries being appended
     prevLogTerm: int  # The term of the prevLogIndex
-    entries: List[Tuple[int, str]]  # A list of new log entries to be appended to the log
+    entries: [LogEntry]  # A list of new log entries to be appended to the log
 
     def __repr__(self):
         return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.commitIndex=}, {self.prevLogIndex=}, {self.prevLogTerm=}, {self.entries=})"

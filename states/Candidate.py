@@ -1,4 +1,4 @@
-from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage
+from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage, AppendEntriesRequest
 from states.Follower import Follower
 from states.Leader import Leader
 from states.Voter import Voter
@@ -7,16 +7,23 @@ from states.Voter import Voter
 class Candidate(Voter):
 
     def setNode(self, node):
+        print("(Candidate) setNode")
+
         super().setNode(node)
         self.votesReceived = 0
         self.startElection()
 
+    def onAppendEntries(self, message: AppendEntriesRequest):
+        state, response = super().onAppendEntries(message)
+        return Follower(), response
+
     def onVoteResponseReceived(self, message: ResponseVoteMessage):
         print("(Candidate) onVoteResponseReceived")
 
+        print(self.votesReceived)
+
         # Check if the message's term is greater than the candidate's current term
         if message.term > self.node.currentTerm:
-            self.onMessageWithGreaterTerm(message)
             print("(Candidate) onVoteResponseReceived: higher term")
             return Follower(), None
 
@@ -33,10 +40,16 @@ class Candidate(Voter):
         print("(Candidate) onVoteResponseReceived: vote not granted")
         return self, None
 
+    def onElectionTimeouted(self):
+        # print("(Candidate) onElectionTimeouted")
+        self.startElection()
+
     def startElection(self):
         """When a Candidate starts an election, it increments the current term, votes for itself,
         and sends RequestVoteRequest messages to all other nodes in the cluster.
         It also resets the election timeout."""
+
+        print("(Candidate) startElection")
 
         # Reset the election timeout
         self.resetElectionTimeout()
@@ -49,10 +62,11 @@ class Candidate(Voter):
         # Send RequestVoteMessage messages to all other nodes in the cluster
         requestVoteMessage = RequestVoteMessage(
             senderID=self.node.id,
-            receiverID=-1,  # ToDo: set in Broadcast. Or leave blank
+            receiverID=-1,
             term=self.node.currentTerm,
             lastLogIndex=len(self.node.log) - 1,
-            lastLogTerm=self.node.log[-1].term if len(self.node.log) > 0 else -1
+            lastLogTerm=self.node.lastLogTerm()
         )
 
-        # ToDo: send broadcast
+        self.node.sendMessageBroadcast(requestVoteMessage)
+

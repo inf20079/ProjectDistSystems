@@ -1,4 +1,6 @@
 import random
+import threading
+import time
 
 from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage
 from states.State import State
@@ -8,25 +10,30 @@ class Voter(State):
 
     def __init__(self):
         self.votedFor = None
-        self.currElectionTimeout = 0
-        self.maxElectionTimeout = random.randrange(150, 300)  # in milliseconds
+        self.electionTimeout = random.randrange(150, 300) / 100  # in milliseconds
+        self.electionActive = True
+
+    def setNode(self, node):
+        super().setNode(node)
+        self.resetElectionTimeout()
+        threading.Thread(
+            target=self.watchElectionTimeout
+        ).start()
+        print("(Voter) setNode done")
 
     def onVoteRequestReceived(self, message: RequestVoteMessage):
         print("(Voter) onVoteRequestReceived")
-        # If the candidate has already voted for someone else in this term, reject the vote
+
+        # If the voter has already voted for someone else in this term, reject the vote
         if self.votedFor is not None and self.votedFor != message.senderID:
             print("(Voter) onVoteRequestReceived: candidate has already voted")
             return self, self.generateVoteResponseMessage(message, False)
 
-        # If the candidate's log is at least as up-to-date as the voter's log, reject the vote
-        if (len(self.node.log) == 0 and message.lastLogIndex == -1) or \
-                len(self.node.log) > 0 and \
-                (
-                        self.node.log[-1].term > message.lastLogTerm or
-                        (self.node.log[-1].term == message.lastLogTerm and len(
-                            self.node.log) - 1 > message.lastLogIndex)
-                ):
-            print("(Voter) onVoteRequestReceived: candidate's log at least as up-to-date as voter's log")
+        # votedFor is None or message.senderID
+
+        # If the candidate's log is less up-to-date as the voter's log, reject the vote
+        if message.lastLogIndex < self.node.lastLogIndex():
+            print("(Voter) onVoteRequestReceived: candidate's log less up-to-date as voter's log")
             return self, self.generateVoteResponseMessage(message, False)
 
         self.votedFor = message.senderID
@@ -34,13 +41,21 @@ class Voter(State):
 
         return self, self.generateVoteResponseMessage(message, True)
 
-    def generateVoteResponseMessage(self, message, vote: bool):
-        return ResponseVoteMessage(
-            senderID=self.node.id,
-            receiverID=message.senderID,
-            term=message.term,
-            voteGranted=vote
-        )
+    def watchElectionTimeout(self):
+        while self.electionActive:
+            while time.time() >= self.nextElectionTimeout and self.electionActive:  # wait for reset
+                time.sleep(0.01)
+            while time.time() < self.nextElectionTimeout and self.electionActive:  # count down
+                time.sleep(0.01)
+            self.onElectionTimeouted()
+
+    def onElectionTimeouted(self):
+        """Must be implemented in children"""
 
     def resetElectionTimeout(self):
-        self.currElectionTimeout = 0
+        # print("resetElectionTimeout")
+        self.nextElectionTimeout = time.time() + self.electionTimeout
+
+    def shutdown(self):
+        print("Voter shutdown")
+        self.electionActive = False

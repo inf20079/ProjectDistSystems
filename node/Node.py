@@ -6,11 +6,19 @@ from middleware.MulticastPublisher import MulticastPublisher
 from middleware.UnicastListener import UnicastListener
 from middleware.UnicastPublisher import UnicastPublisher
 from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Member
+from dataclasses import dataclass
+import socket
 
 
+@dataclass(frozen=True)
+class LogEntry:
+    term: int
+    action: str
+
+    
 class Node:
 
-    def __init__(self, id, state):
+    def __init__(self, id, state, startPort=None, peers=None, log=None):
         # middleware
         hostname = gethostname()
         self.ipAddress = gethostbyname(hostname)
@@ -31,14 +39,22 @@ class Node:
         # raft
         self.id = id
         self.state = state
-        self.log = []  # logEntry = [( 2: 'do something'), ...]
+        self.log: [LogEntry] = [] if log is None else log
 
         self.commitIndex = 0
         self.currentTerm = 0
 
+        self.peers = {} if peers is None else peers
+
         self.state.setNode(self)
 
         self.peers = {}
+
+    def lastLogIndex(self):
+        return len(self.log) - 1 if len(self.log) > 0 else -1
+
+    def lastLogTerm(self):
+        return self.log[-1].term if len(self.log) > 0 else 0
 
     def sendMessageBroadcast(self, message: Any):
         self.broadcastInterface.appendMessage(message)
@@ -49,9 +65,16 @@ class Node:
     def sendMessageUnicast(self, message: Any):
         self.unicastPub.appendMessage(message)
 
+    def manuallySwitchState(self, state):
+        if self.state is not state:
+            print("manuallySwitchState")
+            self.state.shutdown()
+            self.state = state
+            state.setNode(self)
+
     def onMessage(self, message):
         state, response = self.state.onMessage(message)
-        self.state = state
+        self.manuallySwitchState(state)
 
         return state, response
 
@@ -75,3 +98,4 @@ class Node:
         self.broadcastInterface.join()
         self.unicastList.shutdown()
         self.unicastList.join()
+

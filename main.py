@@ -9,20 +9,8 @@ def main():
     # testarea = TrafficArea(2, 3, 4)
     # print(testarea.get_position(2))
 
-    leader = Node(0, Leader(), "")
-    follower = Node(1, Follower(), "")
-
-    addEntryMessage = AppendEntriesRequest(
-        senderID=0,
-        receiverID=1,
-        term=3,
-        commitIndex=4,
-        prevLogIndex=4,
-        prevLogTerm=2,
-        entries=[(5, "command_1"), (6, "command_2"), (7, "command_3")]
-    )
-
-    follower.onMessage(addEntryMessage)
+    leader = Node(0, Leader(), None)
+    #follower = Node(1, Follower(), None)
 
 
 if __name__ == '__main__':

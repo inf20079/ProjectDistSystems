@@ -1,3 +1,4 @@
+import time
 import unittest
 from unittest.mock import Mock, patch
 from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage
@@ -12,6 +13,11 @@ class TestCandidate(unittest.TestCase):
     def setUp(self):
         self.candidateNode = Node(0, Candidate())
         self.candidateNode.peers = [1, 2, 3, 4]
+        self.candidateNode.state.electionTimeout = 100
+
+    def tearDown(self):
+        print("tearDown")
+        self.candidateNode.state.shutdown()
 
     def test_onVoteResponseReceived_higherTerm(self):
         # Test case where response message has a higher term than the candidate's current term
@@ -20,6 +26,7 @@ class TestCandidate(unittest.TestCase):
         state, response = self.candidateNode.onMessage(message)
 
         self.assertTrue(isinstance(state, Follower))
+        self.assertEqual(state, self.candidateNode.state)
         self.assertIsNone(response)
 
     def test_onVoteResponseReceived_voteGranted(self):
@@ -49,18 +56,20 @@ class TestCandidate(unittest.TestCase):
         message3 = ResponseVoteMessage(senderID=3, receiverID=0, term=self.candidateNode.currentTerm, voteGranted=True)
         self.candidateNode.onMessage(message1)
         self.candidateNode.onMessage(message2)
+
         state, response = self.candidateNode.onMessage(message3)
 
         self.assertEqual(state, self.candidateNode.state)
         self.assertTrue(isinstance(state, Leader))
         self.assertIsNone(response)
 
+
     def test_startElection(self):
         # Test case for starting an election
 
         self.candidateNode.state.startElection()
 
-        self.assertEqual(self.candidateNode.currentTerm, 2) # ToDo: Not sure why 2 and not 1
+        self.assertEqual(self.candidateNode.currentTerm, 2)  # ToDo: Not sure why 2 and not 1
         self.assertEqual(self.candidateNode.state.votedFor, self.candidateNode.id)
         self.assertEqual(self.candidateNode.state.votesReceived, 1)
         # self.assertEqual(response.senderID, self.candidateNode.id)
