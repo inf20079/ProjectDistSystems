@@ -49,13 +49,21 @@ class Node:
         self.state.setNode(self)
 
     def pollMessages(self):
-        message = self.unicastList.popMessage()
-        while message is not None:
-            if isinstance(message, RequestDiscover):
-                self.onDiscoveryRequest(message)
-            else:
-                self.onRaftMessage(message)
-            message = self.unicastList.popMessage()
+        def handleQueue(interface):
+            message = interface.popMessage()
+            while message is not None:
+                if message.senderID is not self.id:
+                    if isinstance(message, RequestDiscover):
+                        self.onDiscoveryRequest(message)
+                    elif isinstance(message, ResponseDiscover):
+                        self.onDiscoveryResponseReceived(message)
+                    else:
+                        self.onRaftMessage(message)
+                message = interface.popMessage()
+
+        handleQueue(self.unicastList)
+        handleQueue(self.broadcastInterface)
+
 
     def periodicDiscovery(self):
         while self.isPeriodicDiscoveryActive:
@@ -86,7 +94,7 @@ class Node:
             state.setNode(self)
 
     def onRaftMessage(self, message):
-        state, response = self.state.onRaftMessage(message)
+        state, response = self.state.onMessage(message)
         self.manuallySwitchState(state)
 
         return state, response

@@ -8,8 +8,11 @@ class Candidate(Voter):
 
     def setNode(self, node):
         print("(Candidate) setNode")
-
         super().setNode(node)
+
+        if len(self.node.peers) == 0:
+            node.manuallySwitchState(Leader())
+
         self.votesReceived = 0
         self.startElection()
 
