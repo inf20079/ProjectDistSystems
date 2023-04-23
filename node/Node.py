@@ -4,10 +4,8 @@ from typing import Any
 from middleware.BroadcastInterface import BroadcastInterface
 from middleware.MulticastPublisher import MulticastPublisher
 from middleware.UnicastListener import UnicastListener
-from middleware.UnicastPublisher import UnicastPublisher
-from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Member
-from dataclasses import dataclass
-import socket
+from middleware.UnicastPublisher import UnicastPublisher, Unicast
+from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Member, LogEntry
 
     
 class Node:
@@ -81,6 +79,12 @@ class Node:
         self.peers = self.peers | {message.member}
         self.peers = self.peers | message.memberList
 
+    def onDiscoveryRequest(self, message: RequestDiscover):
+        message = ResponseDiscover(member=Member(self.ipAddress, self.unicastPort),
+                                   memberList=self.peers)
+        unicast = Unicast(message.member.host, message.member.port)
+        self.sendMessageUnicast(unicast)
+
     def shutdown(self):
         self.multicastPub.shutdown()
         self.multicastPub.join()
@@ -90,4 +94,3 @@ class Node:
         self.broadcastInterface.join()
         self.unicastList.shutdown()
         self.unicastList.join()
-
