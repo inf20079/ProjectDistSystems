@@ -43,7 +43,7 @@ class State:
         # If RPC request or response contains term T > currentTerm:
         # convert to follower
         if message.term > prevCurrentTerm:
-            if state is self:
+            if state is self and not isinstance(self, Follower):
                 state = Follower()
 
         return state, response
