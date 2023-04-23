@@ -51,6 +51,7 @@ class TestCandidate(unittest.TestCase):
         self.candidateNode.onMessage(message2)
         state, response = self.candidateNode.onMessage(message3)
 
+        self.assertEqual(state, self.candidateNode.state)
         self.assertTrue(isinstance(state, Leader))
         self.assertIsNone(response)
 
