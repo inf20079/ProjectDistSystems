@@ -39,3 +39,4 @@ class Leader(State):
             entries=[(5, "command_1"), (6, "command_2"), (7, "command_3")]
         )
         self.node.sendMessageBroadcast(message)
+

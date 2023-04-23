@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Set
 
 
 @dataclass(frozen=True)
@@ -79,3 +79,20 @@ class ResponseVoteMessage(Message):
 
     def __repr__(self):
         return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.voteGranted=})"
+
+@dataclass(frozen=True)
+class Member:
+    """ Member class used to initialize discover
+    """
+    senderID: int
+    host: str
+    port: int
+
+@dataclass(frozen=True)
+class RequestDiscover:
+    member: Member  # origin of the request
+
+@dataclass(frozen=True)
+class ResponseDiscover:
+    member: Member  # origin of the response
+    memberList: Set[Member]  # List of known members

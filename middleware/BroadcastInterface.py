@@ -3,14 +3,16 @@ import socket
 import threading
 from queue import Queue
 from time import sleep
+from typing import Any
 
 import select
 
 from middleware.AbstractSocketListener import AbstractSocketListener
+from middleware.types.JsonCoding import EnhancedJSONEncoder
 from middleware.types.MessageTypes import Coordinate
 
 
-class BroadcastListener(AbstractSocketListener):
+class BroadcastInterface(AbstractSocketListener):
 
     def __init__(self, port: int):
         """ Instantiates BroadcastListener: listens on port for incoming broadcast messages.
@@ -23,6 +25,7 @@ class BroadcastListener(AbstractSocketListener):
         self.socket = self.configureSocket()
         self.client_threads = []
         self.message_queue = Queue()
+        self.publish_queue = Queue()
         self.stop_event = threading.Event()
 
     def configureSocket(self) -> socket.socket:
@@ -33,24 +36,50 @@ class BroadcastListener(AbstractSocketListener):
         return sock
 
     def run(self):
-        while not self.stop_event.is_set():
+        while True:
+            if self.stop_event.is_set(): break
             # Wait until there is data available to be read from the socket
-            r_list, _, _ = select.select([self.socket], [], [], 0.1)
+            try:
+                r_list, w_list, _ = select.select([self.socket], [self.socket], [], 0.1)
+            except ValueError:
+                break
+            except OSError:
+                break
 
             # Read the data from the socket if available
-            for sock in r_list:
-                data, address = sock.recvfrom(1024)
+            if r_list:
+                data, address = self.socket.recvfrom(1024)
                 if not data:
                     continue
                 message = json.loads(data.decode())
                 message_parsed = self.parseMessage(message)
                 self.message_queue.put(message_parsed)
+
+            if w_list:
+                if not self.publish_queue.empty():
+                    message = self.publish_queue.get()
+                    message_json_string = json.dumps(message, cls=EnhancedJSONEncoder)
+                    self.socket.sendto(message_json_string.encode(), ("<broadcast>", self.port))
+
+        self.socket.close()
+
+    def appendMessage(self, message: Any):
+        self.publish_queue.put(message)
+
+    def __del__(self):
         self.socket.close()
 
 
 if __name__ == "__main__":
-    sub = BroadcastListener(12003)
+    sub = BroadcastInterface(12003)
     sub.start()
-    while True:
+    i = 0
+    while i <= 5:
+        i += 1
+        sub.appendMessage(Coordinate(i, 2))
+        print(sub.publish_queue.queue)
+        sleep(0.5)
         print(sub.popMessage())
-        sleep(0.2)
+
+    sub.shutdown()
+    sub.join()

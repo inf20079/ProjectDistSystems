@@ -3,14 +3,14 @@ import socket
 import json
 from time import sleep
 
-from middleware.BroadcastListener import BroadcastListener
+from middleware.BroadcastInterface import BroadcastInterface
 from middleware.types.MessageTypes import Coordinate
 
 
-class TestBroadcastListener(unittest.TestCase):
+class TestBroadcastInterface(unittest.TestCase):
     def setUp(self):
         self.port = 12000
-        self.listener = BroadcastListener(self.port)
+        self.listener = BroadcastInterface(self.port)
 
     def test_message_queue(self):
         self.listener.start()

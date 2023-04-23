@@ -16,10 +16,14 @@ class UnicastListener(AbstractSocketListener):
         return sock
 
     def run(self):
+        self.client_threads = []
         while True:
             if self.stop_event.is_set():
                 break
-            client_socket, addr = self.socket.accept()
+            try:
+                client_socket, addr = self.socket.accept()
+            except OSError:
+                break
             client_thread = threading.Thread(target=self.listenToClient, args=(client_socket,))
             client_thread.start()
             self.client_threads.append(client_thread)
@@ -42,7 +46,7 @@ class UnicastListener(AbstractSocketListener):
 
 
 if __name__ == "__main__":
-    sub = UnicastListener("localhost", 12004)
+    sub = UnicastListener("localhost", 12005)
     sub.start()
     while True:
         print(sub.popMessage())
