@@ -37,10 +37,15 @@ class Candidate(Voter):
         print("(Candidate) onVoteResponseReceived: vote not granted")
         return self, None
 
+    def onElectionTimeouted(self):
+        self.startElection()
+
     def startElection(self):
         """When a Candidate starts an election, it increments the current term, votes for itself,
         and sends RequestVoteRequest messages to all other nodes in the cluster.
         It also resets the election timeout."""
+
+        print("(Candidate) startElection")
 
         # Reset the election timeout
         self.resetElectionTimeout()

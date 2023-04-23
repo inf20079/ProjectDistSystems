@@ -1,4 +1,5 @@
 import random
+import threading
 import time
 
 from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage
@@ -9,12 +10,11 @@ class Voter(State):
 
     def __init__(self):
         self.votedFor = None
-        self.electionTimeout = random.randrange(150, 300) / 1000  # in milliseconds
+        self.electionTimeout = random.randrange(150, 300) / 100  # in milliseconds
 
     def setNode(self, node):
         super().setNode(node)
         self.resetElectionTimeout()
-        self.watchElectionTimeout()
 
     def onVoteRequestReceived(self, message: RequestVoteMessage):
         print("(Voter) onVoteRequestReceived")
@@ -54,4 +54,9 @@ class Voter(State):
         """Must be implemented in children"""
 
     def resetElectionTimeout(self):
+        print("resetElectionTimeout")
         self.nextElectionTimeout = time.time() + self.electionTimeout
+
+        threading.Thread(
+            target=self.watchElectionTimeout
+        ).start()

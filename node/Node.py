@@ -50,10 +50,12 @@ class Node:
 
     def manuallySwitchState(self, state):
         self.state = state
+        state.setNode(self)
 
     def onMessage(self, message):
         state, response = self.state.onMessage(message)
         self.state = state
+        state.setNode(self)
 
         return state, response
 
