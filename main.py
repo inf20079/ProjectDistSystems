@@ -9,8 +9,8 @@ def main():
     # testarea = TrafficArea(2, 3, 4)
     # print(testarea.get_position(2))
 
-    #leader = Node(0, Leader(), None)
-    follower = Node(1, Follower(), None)
+    leader = Node(0, Leader(), None)
+    #follower = Node(1, Follower(), None)
 
 
 if __name__ == '__main__':

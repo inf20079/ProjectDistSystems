@@ -1,3 +1,5 @@
+import threading
+import time
 from collections import defaultdict
 
 from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse
@@ -9,6 +11,7 @@ class Leader(State):
     def __init__(self):
         self.nextIndex = {}  # for each server, index of the next log entry to send to that server
         self.matchIndex = {}  # for each server, index of highest log entry known to be replicated on server
+        self.heartbeatTimeout = 0.1
 
     def setNode(self, node):
         print("(Leader) setNode")
@@ -19,6 +22,10 @@ class Leader(State):
 
         # Upon election: send initial heartbeat
         self.sendHeartbeat()
+
+        threading.Thread(
+            target=self.watchHeartbeatTimeout()
+        ).start()
 
     def onResponseReceived(self, message: AppendEntriesResponse):
         print("(Leader) onResponseReceived")
@@ -61,3 +68,16 @@ class Leader(State):
             entries=[(5, "command_1"), (6, "command_2"), (7, "command_3")]
         )
         self.node.sendMessageBroadcast(message)
+        self.resetHeartbeatTimeout()
+
+    def watchHeartbeatTimeout(self):
+        while True:
+            while time.time() >= self.nextHeartbeatTimeout:  # wait for reset
+                time.sleep(0.01)
+            while time.time() < self.nextHeartbeatTimeout:  # count down
+                time.sleep(0.01)
+            self.sendHeartbeat()
+
+    def resetHeartbeatTimeout(self):
+        print("resetHeartbeatTimeout")
+        self.nextHeartbeatTimeout = time.time() + self.heartbeatTimeout
