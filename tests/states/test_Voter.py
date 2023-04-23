@@ -39,6 +39,6 @@ class TestVoter(unittest.TestCase):
         self.assertIsNone(self.voter.votedFor)
 
     def test_resetElectionTimeout(self):
-        self.voter.currElectionTimeout = 100
+        self.voter.nextElectionTimeout = 100
         self.voter.resetElectionTimeout()
-        self.assertEqual(self.voter.currElectionTimeout, 0)
+        self.assertEqual(self.voter.nextElectionTimeout, 0)

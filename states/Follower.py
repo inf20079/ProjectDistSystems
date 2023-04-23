@@ -1,4 +1,4 @@
-from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse
+from middleware.types.MessageTypes import AppendEntriesRequest
 from states.Voter import Voter
 
 
@@ -11,3 +11,9 @@ class Follower(Voter):
     def onAppendEntries(self, message: AppendEntriesRequest):
         self.resetElectionTimeout()
         return super().onAppendEntries(message)
+
+    def onElectionTimeouted(self):
+        print("(Follower) onElectionTimeouted")
+        from states.Candidate import Candidate
+        self.node.manuallySwitchState(Candidate())
+

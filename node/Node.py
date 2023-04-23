@@ -48,6 +48,9 @@ class Node:
         # ToDo: Unicast
         pass
 
+    def manuallySwitchState(self, state):
+        self.state = state
+
     def onMessage(self, message):
         state, response = self.state.onMessage(message)
         self.state = state
