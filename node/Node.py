@@ -9,16 +9,10 @@ from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Mem
 from dataclasses import dataclass
 import socket
 
-
-@dataclass(frozen=True)
-class LogEntry:
-    term: int
-    action: str
-
     
 class Node:
 
-    def __init__(self, id, state, startPort=None, peers=None, log=None):
+    def __init__(self, id, state, peers=None, log=None):
         # middleware
         hostname = gethostname()
         self.ipAddress = gethostbyname(hostname)
@@ -47,8 +41,6 @@ class Node:
         self.peers = {} if peers is None else peers
 
         self.state.setNode(self)
-
-        self.peers = {}
 
     def lastLogIndex(self):
         return len(self.log) - 1 if len(self.log) > 0 else -1

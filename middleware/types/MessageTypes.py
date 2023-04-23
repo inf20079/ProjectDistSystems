@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 from typing import List, Tuple, Set
 
-from node.Node import LogEntry
 
+@dataclass(frozen=True)
+class LogEntry:
+    term: int
+    action: str
 
 @dataclass(frozen=True)
 class Coordinate:
