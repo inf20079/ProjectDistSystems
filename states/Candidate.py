@@ -55,4 +55,4 @@ class Candidate(Voter):
             lastLogTerm=self.node.log[-1].term if len(self.node.log) > 0 else -1
         )
 
-        return self, requestVoteMessage
+        # ToDo: send broadcast
