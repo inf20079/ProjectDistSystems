@@ -35,7 +35,7 @@ class Leader(State):
             term=self.node.currentTerm,
             commitIndex=self.node.commitIndex,
             prevLogIndex=len(self.node.log)-1,
-            prevLogTerm=self.node.log[-1].term if self.node.log else 0,
+            prevLogTerm=self.node.lastLogTerm(),
             entries=[(5, "command_1"), (6, "command_2"), (7, "command_3")]
         )
         self.node.sendMessageBroadcast(message)

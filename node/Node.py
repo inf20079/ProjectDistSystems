@@ -16,7 +16,10 @@ class Node:
         # ToDo: Discover peers.
 
     def lastLogIndex(self):
-        return self.log[-1].term if len(self.log) > 0 else -1
+        return len(self.log)-1 if len(self.log) > 0 else -1
+
+    def lastLogTerm(self):
+        return self.log[-1].term if len(self.log) > 0 else 0
 
     def sendMessageBroadcast(self, message):
         print("(Node) sendMessageBroadcast")

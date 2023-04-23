@@ -49,10 +49,10 @@ class Candidate(Voter):
         # Send RequestVoteMessage messages to all other nodes in the cluster
         requestVoteMessage = RequestVoteMessage(
             senderID=self.node.id,
-            receiverID=-1,  # ToDo: set in Broadcast. Or leave blank
+            receiverID=-1,
             term=self.node.currentTerm,
             lastLogIndex=len(self.node.log) - 1,
-            lastLogTerm=self.node.log[-1].term if len(self.node.log) > 0 else -1
+            lastLogTerm=self.node.lastLogTerm()
         )
 
-        # ToDo: send broadcast
+        self.node.sendMessageBroadcast(requestVoteMessage)
