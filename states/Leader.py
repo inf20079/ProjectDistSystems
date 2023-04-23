@@ -1,29 +1,35 @@
 from collections import defaultdict
 
-from middleware.types.MessageTypes import AddEntriesRequest
+from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse
 from states.State import State
 
 
 class Leader(State):
 
     def __init__(self):
-        self.nextIndexes = defaultdict(int)
-        self.matchIndex = defaultdict(int)
+        self.nextIndexes = {}
+        self.matchIndexes = {}
 
     def setNode(self, node):
         print("(Leader) setNode")
         super().setNode(node)
-        self.sendHeartbeat()
-        # more logic...
 
-    def onResponseReceived(self, message):
+        self.nextIndexes = {peer: len(node.log) for peer in node.peers}
+        self.matchIndexes = {peer: 0 for peer in node.peers}
+
+        self.sendHeartbeat()
+
+    def onResponseReceived(self, message: AppendEntriesResponse):
         print("onResponseReceived")
-        # logic... (e.g. update state based on follower's response)
+
+        if (message.success):
+            self.matchIndexes[message.senderID]
+
         return self, None
 
     def sendHeartbeat(self):
         print("(Leader) sendHeartbeat")
-        message = AddEntriesRequest(
+        message = AppendEntriesRequest(
             senderID=self.node.id,
             receiverID=None,
             term=self.node.currentTerm,

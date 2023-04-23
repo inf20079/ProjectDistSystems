@@ -56,7 +56,7 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
         except TypeError:
             pass
         try:
-            return AddEntriesRequest.fromDict(message)
+            return AppendEntriesRequest.fromDict(message)
         except TypeError:
             pass
         try:

@@ -19,14 +19,14 @@ class State:
         from states.Voter import Voter
 
         if (message.term > self.node.currentTerm):
-            self.node.currentTerm = message.term
+            self.onMessageWithGreaterTerm(message)
         elif (message.term < self.node.currentTerm):
             # ToDo: Tell the sender that they're behind
             pass
 
-        if isinstance(message, AddEntriesRequest):
+        if isinstance(message, AppendEntriesRequest):
             if isinstance(self, Follower):
-                return self.onAddEntries(message)
+                return self.onAppendEntries(message)
             print("instance not a follower")
         elif isinstance(message, RequestVoteMessage):
             if isinstance(self, Voter):
@@ -36,7 +36,7 @@ class State:
             if isinstance(self, Candidate):
                 return self.onVoteResponseReceived(message)
             print("instance not a candidate")
-        elif isinstance(self, AddEntriesResponse):
+        elif isinstance(self, AppendEntriesResponse):
             if isinstance(self, Leader):
                 return self.onResponseReceived(message)
             print("instance not a leader")
@@ -45,7 +45,8 @@ class State:
         return self, None
 
 
-
+    def onMessageWithGreaterTerm(self, message):
+        self.node.currentTerm = message.term
 
 
     def onLeaderTimeout(self, message):

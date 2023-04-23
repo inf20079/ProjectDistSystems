@@ -46,7 +46,7 @@ class Message:
 
 
 @dataclass(frozen=True)
-class AddEntriesRequest(Message):
+class AppendEntriesRequest(Message):
     commitIndex: int  # The index of the highest log entry that the leader knows to be committed
     prevLogIndex: int  # The index of the log entry immediately preceding the new entries being appended
     prevLogTerm: int  # The term of the prevLogIndex
@@ -57,28 +57,25 @@ class AddEntriesRequest(Message):
 
 
 @dataclass(frozen=True)
-class AddEntriesResponse(Message):
+class AppendEntriesResponse(Message):
     success: bool
-    conflictIndex: int
-    conflictTerm: int
 
     def __repr__(self):
-        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.success=}, {self.conflictIndex=}, {self.conflictTerm=})"
+        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.success=})"
 
 
 @dataclass(frozen=True)
-class VoteMessage(Message):
-    vote = None  # None to request, 1 vote yes, 0 vote no
+class RequestVoteMessage(Message):
+    lastLogIndex: int
+    lastLogTerm: int
 
     def __repr__(self):
-        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.vote=})"
+        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.lastLogIndex=}, {self.lastLogTerm=})"
 
 
 @dataclass(frozen=True)
-class RequestVoteMessage(VoteMessage):
-    vote = None
+class ResponseVoteMessage(Message):
+    voteGranted: bool
 
-
-@dataclass(frozen=True)
-class ResponseVoteMessage(VoteMessage):
-    vote: int  # 1 vote yes, 0 vote no
+    def __repr__(self):
+        return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.voteGranted=})"

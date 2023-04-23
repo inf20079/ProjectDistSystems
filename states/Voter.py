@@ -1,4 +1,4 @@
-from middleware.types.MessageTypes import AddEntriesRequest, ResponseVoteMessage
+from middleware.types.MessageTypes import AppendEntriesRequest, ResponseVoteMessage, RequestVoteMessage
 from states.State import State
 
 
@@ -6,12 +6,13 @@ class Voter(State):
 
     def __init__(self):
         self.lastVote = None
+        self.electionTimeout = 0
 
-    def onVoteRequestReceived(self, message):
+    def onVoteRequestReceived(self, message: RequestVoteMessage):
         print("onVoteRequestReceived")
 
         if (self.lastVote is None and
-                message is AddEntriesRequest and
+                message is AppendEntriesRequest and
                 message.lastLogIndex >= self.node.lastLogIndex):
             self.lastVote = message.senderID
             self.sendVoteResponseMessage(message, True)
@@ -25,6 +26,11 @@ class Voter(State):
             senderID=self.node.id,
             receiverID=message.senderID,
             term=message.term,
-            vote=vote
+            voteGranted=vote
         )
         self.node.sendResponseMessage(voteResponse)
+
+
+    def resetElectionTimeout(self):
+        # ToDo
+        pass

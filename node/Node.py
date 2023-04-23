@@ -2,15 +2,18 @@
 
 class Node:
 
-    def __init__(self, id, state, log):
+    def __init__(self, id, state):
         self.id = id
         self.state = state
-        self.log = log  # logEntry = { 'term': 2, 'command': 'do something }
+        self.log = []  # logEntry = [( 2: 'do something'), ...]
 
         self.commitIndex = 0
         self.currentTerm = 0
 
         self.state.setNode(self)
+
+        self.peers = {}
+        # ToDo: Discover peers.
 
     def sendMessageBroadcast(self, message):
         print("(Node) sendMessageBroadcast")
