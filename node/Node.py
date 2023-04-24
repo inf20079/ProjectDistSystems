@@ -77,12 +77,14 @@ class Node:
         return self.log[-1].term if len(self.log) > 0 else 0
 
     def sendMessageBroadcast(self, message: Any):
+        print(f"[{self.id}](Node) sendMessageBroadcast")
         self.broadcastInterface.appendMessage(message)
 
     def sendMessageMulticast(self, message: Any):
         self.multicastPub.appendMessage(message)
 
     def sendMessageUnicast(self, message: Any):
+        print(f"[{self.id}](Node) sendMessageUnicast")
         self.unicastPub.appendMessage(message)
 
     def manuallySwitchState(self, state):
@@ -93,7 +95,12 @@ class Node:
             state.setNode(self)
 
     def onRaftMessage(self, message):
+        print(f"[{self.id}](Node) onRaftMessage from {message.senderID} to {message.receiverID}")
         state, response = self.state.onMessage(message)
+
+        if response is not None:
+            self.sendMessageUnicast(message)
+
         self.manuallySwitchState(state)
 
         return state, response

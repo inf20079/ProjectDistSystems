@@ -52,7 +52,7 @@ class State:
     def onAppendEntries(self, message: AppendEntriesRequest):
         """To be overriden by children"""
 
-        print("(State) onAddEntries")
+        print(f"[{self.node.id}](State) onAddEntries")
 
         # Reply false if message.term < currentTerm
         if message.term < self.node.currentTerm:

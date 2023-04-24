@@ -7,7 +7,7 @@ from states.Voter import Voter
 class Candidate(Voter):
 
     def setNode(self, node):
-        print("(Candidate) setNode")
+        print(f"[{node.id}](Candidate) setNode")
         super().setNode(node)
 
         if len(self.node.peers) == 0:
@@ -22,30 +22,30 @@ class Candidate(Voter):
         return Follower(), response
 
     def onVoteResponseReceived(self, message: ResponseVoteMessage):
-        print("(Candidate) onVoteResponseReceived")
+        print(f"[{self.node.id}](Candidate) onVoteResponseReceived")
 
         print(self.votesReceived)
 
         # Check if the message's term is greater than the candidate's current term
         if message.term > self.node.currentTerm:
-            print("(Candidate) onVoteResponseReceived: higher term")
+            print(f"[{self.node.id}](Candidate) onVoteResponseReceived: higher term")
             return Follower(), None
 
         # If the vote was granted, increment the vote count and check if the candidate
         # has received votes from a majority of the cluster
         if message.voteGranted:
             self.votesReceived += 1
-            print("(Candidate) onVoteResponseReceived: vote granted")
+            print(f"[{self.node.id}](Candidate) onVoteResponseReceived: vote granted")
             if self.votesReceived > len(self.node.peers) // 2:
-                print("(Candidate) onVoteResponseReceived: majority votes")
+                print(f"[{self.node.id}](Candidate) onVoteResponseReceived: majority votes")
                 return Leader(), None
             return self, None
 
-        print("(Candidate) onVoteResponseReceived: vote not granted")
+        print(f"[{self.node.id}](Candidate) onVoteResponseReceived: vote not granted")
         return self, None
 
     def onElectionTimeouted(self):
-        # print("(Candidate) onElectionTimeouted")
+        # print(f"[{self.node.id}](Candidate) onElectionTimeouted")
         self.startElection()
 
     def startElection(self):
@@ -53,7 +53,7 @@ class Candidate(Voter):
         and sends RequestVoteRequest messages to all other nodes in the cluster.
         It also resets the election timeout."""
 
-        print("(Candidate) startElection")
+        print(f"[{self.node.id}](Candidate) startElection")
 
         # Reset the election timeout
         self.recurringProcedure.resetTimeout()

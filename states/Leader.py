@@ -12,12 +12,12 @@ class Leader(State):
     def __init__(self):
         self.nextIndex = {}  # for each server, index of the next log entry to send to that server
         self.matchIndex = {}  # for each server, index of highest log entry known to be replicated on server
-        self.heartbeatTimeout = 0.1
+        self.heartbeatTimeout = 2  # 0.1
         self.heartbeatActive = True
         self.recurringProcedure = RecurringProcedure(self.heartbeatTimeout, self.sendHeartbeat)
 
     def setNode(self, node):
-        print("(Leader) setNode")
+        print(f"[{node.id}](Leader) setNode")
         super().setNode(node)
 
         # Upon election: send initial heartbeat
@@ -26,7 +26,7 @@ class Leader(State):
 
 
     def onResponseReceived(self, message: AppendEntriesResponse):
-        print("(Leader) onResponseReceived")
+        print(f"[{self.node.id}](Leader) onResponseReceived")
 
         if message.senderID not in self.nextIndex:
             self.nextIndex[message.senderID] = self.node.lastLogIndex() + 1
@@ -60,7 +60,7 @@ class Leader(State):
             return self, None
 
     def sendHeartbeat(self):
-        print("(Leader) sendHeartbeat")
+        print(f"[{self.node.id}](Leader) sendHeartbeat")
         message = AppendEntriesRequest(
             senderID=self.node.id,
             receiverID=None,
@@ -78,5 +78,5 @@ class Leader(State):
         return self, self.generateVoteResponseMessage(message, False)
 
     def shutdown(self):
-        print("(Leader) shutdown")
+        print(f"[{self.node.id}](Leader) shutdown")
         self.recurringProcedure.shutdown()
