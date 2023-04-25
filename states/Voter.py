@@ -43,6 +43,6 @@ class Voter(State):
         """Must be implemented in children"""
 
     def shutdown(self):
-        if self.node is not None:
+        if hasattr(self, "node"):
             print(f"[{self.node.id}](Voter) shutdown")
         self.recurringProcedure.shutdown()

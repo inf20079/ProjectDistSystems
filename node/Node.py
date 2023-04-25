@@ -93,8 +93,8 @@ class Node:
         if self.state is not state:
             # print("manuallySwitchState")
             self.state.shutdown()
-            self.state = state
             state.setNode(self)
+            self.state = state
 
     def onRaftMessage(self, message):
         print(f"[{self.id}](Node) onRaftMessage from {message.senderID} to {message.receiverID}")

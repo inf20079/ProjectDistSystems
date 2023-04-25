@@ -12,7 +12,7 @@ class Leader(State):
     def __init__(self):
         self.nextIndex = {}  # for each server, index of the next log entry to send to that server
         self.matchIndex = {}  # for each server, index of highest log entry known to be replicated on server
-        self.heartbeatTimeout = 2  # 0.1
+        self.heartbeatTimeout = 0.1
         self.heartbeatActive = True
         self.recurringProcedure = RecurringProcedure(self.heartbeatTimeout, self.sendHeartbeat)
 
@@ -68,7 +68,7 @@ class Leader(State):
             commitIndex=self.node.commitIndex,
             prevLogIndex=len(self.node.log) - 1,
             prevLogTerm=self.node.lastLogTerm(),
-            entries=[LogEntry(5, "command_1"), LogEntry(6, "command_2"), LogEntry(7, "command_3")]
+            entries=[]
         )
         self.node.sendMessageBroadcast(message)
         self.recurringProcedure.resetTimeout()

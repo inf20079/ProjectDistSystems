@@ -48,8 +48,8 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
         :rtype: dataclass
         """
 
-        print(dict)
-        
+        print(message)
+
         try:
             return Coordinate.fromDict(message)
         except TypeError:
@@ -60,7 +60,7 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
             pass
         try:
             return AppendEntriesRequest.fromDict(message)
-        except TypeError:
+        except TypeError and KeyError:
             pass
         try:
             return AppendEntriesResponse.fromDict(message)
