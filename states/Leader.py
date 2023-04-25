@@ -2,7 +2,7 @@ import threading
 import time
 from collections import defaultdict
 
-from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse, RequestVoteMessage
+from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse, RequestVoteMessage, LogEntry
 from node.RecurringProcedure import RecurringProcedure
 from states.State import State
 
@@ -68,7 +68,7 @@ class Leader(State):
             commitIndex=self.node.commitIndex,
             prevLogIndex=len(self.node.log) - 1,
             prevLogTerm=self.node.lastLogTerm(),
-            entries=[(5, "command_1"), (6, "command_2"), (7, "command_3")]
+            entries=[LogEntry(5, "command_1"), LogEntry(6, "command_2"), LogEntry(7, "command_3")]
         )
         self.node.sendMessageBroadcast(message)
         self.recurringProcedure.resetTimeout()

@@ -7,6 +7,9 @@ class LogEntry:
     term: int
     action: str
 
+    def __repr__(self):
+        return f"LogEntry({self.term=}, {self.action=})"
+
 @dataclass(frozen=True)
 class Coordinate:
     """ Coordinate Dataclass
@@ -55,7 +58,21 @@ class AppendEntriesRequest(Message):
     commitIndex: int  # The index of the highest log entry that the leader knows to be committed
     prevLogIndex: int  # The index of the log entry immediately preceding the new entries being appended
     prevLogTerm: int  # The term of the prevLogIndex
-    entries: [LogEntry]  # A list of new log entries to be appended to the log
+    entries: List[LogEntry]  # A list of new log entries to be appended to the log
+
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        try:
+            dict["entries"] = [LogEntry(**entry) for entry in dict["entries"]]
+            return cls(**dict)
+        except KeyError as e:
+            raise e
 
     def __repr__(self):
         return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.commitIndex=}, {self.prevLogIndex=}, {self.prevLogTerm=}, {self.entries=})"
@@ -89,7 +106,7 @@ class ResponseVoteMessage(Message):
 class Member:
     """ Member class used to initialize discover
     """
-    senderID: int
+    id: int
     host: str
     port: int
 
@@ -133,4 +150,8 @@ class ResponseDiscover:
         :return:
         :rtype: coordinate dataclass
         """
-        return cls(**dict)
+        try:
+            dict["memberList"] = [Member(**entry) for entry in dict["memberList"]]
+            return cls(**dict)
+        except KeyError as e:
+            raise e

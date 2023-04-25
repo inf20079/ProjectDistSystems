@@ -101,17 +101,17 @@ class Node:
         state, response = self.state.onMessage(message)
 
         if response is not None:
-            self.sendMessageUnicast(message)
+            self.sendMessageUnicast(response)
 
         self.manuallySwitchState(state)
 
         return state, response
 
     def getIpByID(self, id: int) -> Member:
-        return [member for member in self.peers if member.id == id]
+        return [member for member in self.peers if member.id == id][0]
 
     def sendDiscovery(self):
-        message = RequestDiscover(Member(senderID=self.id, host=self.ipAddress, port=self.unicastPort))
+        message = RequestDiscover(Member(id=self.id, host=self.ipAddress, port=self.unicastPort))
         self.broadcastInterface.appendMessage(message)
 
     def onDiscoveryResponseReceived(self, message: ResponseDiscover):

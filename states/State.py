@@ -82,7 +82,7 @@ class State:
             j += 1
 
         # Append any new entries not already in the log
-        self.node.log.append(message.entries[j:])
+        self.node.log += message.entries[j:]
 
         # If leaderCommit > commitIndex, set commitIndex =
         # min(leaderCommit, index of last new entry)
@@ -107,12 +107,13 @@ class State:
         )
 
     def generateVoteResponseMessage(self, message, vote: bool):
-        return ResponseVoteMessage(
+        a = ResponseVoteMessage(
             senderID=self.node.id,
             receiverID=message.senderID,
             term=message.term,
             voteGranted=vote
         )
+        return a
 
     def shutdown(self):
         """To be overriden"""
