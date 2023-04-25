@@ -1,3 +1,5 @@
+import inspect
+import logging
 import threading
 import time
 from socket import gethostname, gethostbyname
@@ -12,7 +14,7 @@ from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Mem
 
 class Node:
 
-    def __init__(self, id, state, ipAddress=None, broadcastPort=None, unicastPort=None, peers=None, log=None):
+    def __init__(self, id, stateClass, ipAddress=None, broadcastPort=None, unicastPort=None, peers=None, log=None):
         # middleware
         self.ipAddress = ipAddress or gethostbyname(gethostname())
         self.broadcastPort = broadcastPort or 12004
@@ -31,7 +33,6 @@ class Node:
 
         # raft
         self.id = id
-        self.state = state
         self.log: [LogEntry] = [] if log is None else log
 
         self.commitIndex = 0
@@ -45,7 +46,8 @@ class Node:
             target=self.periodicDiscovery
         )
 
-        self.state.setNode(self)
+        self.state = stateClass(self)
+        print(self.state)
 
     def pollMessages(self):
         def handleQueue(interface):
@@ -84,28 +86,29 @@ class Node:
         self.multicastPub.appendMessage(message)
 
     def sendMessageUnicast(self, message: Message):
-        print(f"[{self.id}](Node) sendMessageUnicast")
+        print(f"[{self.id}](Node) sendMessageUnicast: {message.receiverID=}")
         receiver = self.getIpByID(message.receiverID)
         unicast = Unicast(receiver.host, receiver.port, message)
         self.unicastPub.appendMessage(unicast)
 
-    def manuallySwitchState(self, state):
-        if self.state is not state:
-            # print("manuallySwitchState")
+    def manuallySwitchState(self, stateClass):
+        if not inspect.isclass(stateClass):
+            raise TypeError("ERROR: STATECLASS IS INSTANCE AND NOT CLASS")
+        if not isinstance(self.state, stateClass):
+            print(f"manuallySwitchState: from {self.state.__class__} to {stateClass}")
             self.state.shutdown()
-            state.setNode(self)
-            self.state = state
+            self.state = stateClass(self)
 
     def onRaftMessage(self, message):
         print(f"[{self.id}](Node) onRaftMessage from {message.senderID} to {message.receiverID}")
-        state, response = self.state.onMessage(message)
+        stateClass, response = self.state.onMessage(message=message)
 
         if response is not None:
             self.sendMessageUnicast(response)
 
-        self.manuallySwitchState(state)
+        self.manuallySwitchState(stateClass)
 
-        return state, response
+        return stateClass, response
 
     def getIpByID(self, id: int) -> Member:
         return [member for member in self.peers if member.id == id][0]

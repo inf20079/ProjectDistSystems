@@ -30,5 +30,5 @@ class RecurringProcedure:
         self.nextTimeout = time.time() + self.timeout
 
     def shutdown(self):
-        print(f"(Recurring Procedure) shutdown")
+        # print(f"(Recurring Procedure) shutdown")
         self.active = False

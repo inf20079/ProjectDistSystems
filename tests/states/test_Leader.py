@@ -7,9 +7,9 @@ from middleware.types.MessageTypes import AppendEntriesResponse, LogEntry
 
 class TestLeader(unittest.TestCase):
     def setUp(self):
-        self.leader = Leader()
-        self.leaderNode = Node(0, self.leader, peers=[1, 2],
+        self.leaderNode = Node(0, Leader, peers=[1, 2],
                                log=[LogEntry(0, "a"), LogEntry(0, "b"), LogEntry(1, "c")])
+        self.leader = self.leaderNode.state
 
     def tearDown(self):
         self.leaderNode.shutdown()
@@ -22,7 +22,10 @@ class TestLeader(unittest.TestCase):
             success=True
         )
 
-        self.assertEqual(self.leader.onResponseReceived(message), (self.leader, None))
+        stateClass, response = self.leader.onResponseReceived(message)
+
+        self.assertEqual(stateClass, Leader)
+        self.assertIsNone(response)
         self.assertEqual(self.leader.nextIndex[1], 2)
         # ToDo: matchIndex
 
@@ -34,8 +37,8 @@ class TestLeader(unittest.TestCase):
             success=False
         )
 
-        state, response = self.leader.onResponseReceived(message)
+        stateClass, response = self.leader.onResponseReceived(message)
 
-        self.assertEqual(state, self.leader)
+        self.assertEqual(stateClass, Leader)
         self.assertIsNotNone(response)
         self.assertEqual(self.leader.nextIndex[1], 2)  # decrement nextIndex

@@ -48,8 +48,6 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
         :rtype: dataclass
         """
 
-        print(message)
-
         try:
             return Coordinate.fromDict(message)
         except TypeError:

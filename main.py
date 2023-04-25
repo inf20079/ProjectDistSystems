@@ -15,7 +15,7 @@ def main():
     for i in range(nodeCount):
         peers = members.copy()
         del peers[i]
-        nodes.append(Node(i, Follower(),
+        nodes.append(Node(i, Follower,
                           ipAddress="localhost",
                           unicastPort=members[i].port,
                           broadcastPort=12005,

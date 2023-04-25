@@ -32,7 +32,7 @@ class Coordinate:
         return f"Coordinate(x={self.x}, y={self.y})"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class Message:
     senderID: int
     receiverID: int
@@ -53,7 +53,7 @@ class Message:
         return f"Message({self.senderID=}, {self.receiverID=}, {self.term=})"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class AppendEntriesRequest(Message):
     commitIndex: int  # The index of the highest log entry that the leader knows to be committed
     prevLogIndex: int  # The index of the log entry immediately preceding the new entries being appended
@@ -79,7 +79,7 @@ class AppendEntriesRequest(Message):
         return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.commitIndex=}, {self.prevLogIndex=}, {self.prevLogTerm=}, {self.entries=})"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class AppendEntriesResponse(Message):
     success: bool
 
@@ -87,7 +87,7 @@ class AppendEntriesResponse(Message):
         return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.success=})"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class RequestVoteMessage(Message):
     lastLogIndex: int
     lastLogTerm: int
@@ -96,7 +96,7 @@ class RequestVoteMessage(Message):
         return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.lastLogIndex=}, {self.lastLogTerm=})"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class ResponseVoteMessage(Message):
     voteGranted: bool
 
@@ -152,7 +152,6 @@ class ResponseDiscover:
         :rtype: coordinate dataclass
         """
         try:
-            print(dict)
             dict["memberList"] = [Member(**entry) for entry in dict["memberList"]]
             return cls(**dict)
         except KeyError as e:

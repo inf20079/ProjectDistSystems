@@ -1,5 +1,6 @@
 import time
 import unittest
+from inspect import isclass
 from unittest.mock import Mock, patch
 from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage
 from node.Node import Node
@@ -11,7 +12,7 @@ from states.Leader import Leader
 class TestCandidate(unittest.TestCase):
 
     def setUp(self):
-        self.candidateNode = Node(0, Candidate(), peers=[1, 2, 3, 4])
+        self.candidateNode = Node(0, Candidate, peers=[1, 2, 3, 4])
         self.candidateNode.state.electionTimeout = 100
 
     def tearDown(self):
@@ -22,30 +23,30 @@ class TestCandidate(unittest.TestCase):
         # Test case where response message has a higher term than the candidate's current term
 
         message = ResponseVoteMessage(senderID=1, receiverID=0, term=2, voteGranted=False)
-        state, response = self.candidateNode.onRaftMessage(message)
+        stateClass, response = self.candidateNode.onRaftMessage(message)
 
-        self.assertTrue(isinstance(state, Follower))
-        self.assertEqual(state, self.candidateNode.state)
+        self.assertEqual(stateClass, Follower)
+        self.assertTrue(isinstance(self.candidateNode.state, stateClass))
         self.assertIsNone(response)
 
     def test_onVoteResponseReceived_voteGranted(self):
         # Test case where the vote is granted
 
         message = ResponseVoteMessage(senderID=1, receiverID=0, term=self.candidateNode.currentTerm, voteGranted=True)
-        state, response = self.candidateNode.onRaftMessage(message)
+        stateClass, response = self.candidateNode.onRaftMessage(message)
 
         self.assertEqual(self.candidateNode.state.votesReceived, 2)
-        self.assertEqual(state, self.candidateNode.state)
+        self.assertTrue(isinstance(self.candidateNode.state, stateClass))
         self.assertIsNone(response)
 
     def test_onVoteResponseReceived_voteNotGranted(self):
         # Test case where the vote is not granted
 
         message = ResponseVoteMessage(senderID=1, receiverID=0, term=self.candidateNode.currentTerm, voteGranted=False)
-        state, response = self.candidateNode.onRaftMessage(message)
+        stateClass, response = self.candidateNode.onRaftMessage(message)
 
         self.assertEqual(self.candidateNode.state.votesReceived, 1)
-        self.assertEqual(state, self.candidateNode.state)
+        self.assertTrue(isinstance(self.candidateNode.state, stateClass))
         self.assertIsNone(response)
 
     def test_onVoteResponseReceived_majorityVotes(self):
@@ -56,10 +57,10 @@ class TestCandidate(unittest.TestCase):
         self.candidateNode.onRaftMessage(message1)
         self.candidateNode.onRaftMessage(message2)
 
-        state, response = self.candidateNode.onRaftMessage(message3)
+        stateClass, response = self.candidateNode.onRaftMessage(message3)
 
-        self.assertEqual(state, self.candidateNode.state)
-        self.assertTrue(isinstance(state, Leader))
+        self.assertEqual(stateClass, Leader)
+        self.assertTrue(isinstance(self.candidateNode.state, stateClass))
         self.assertIsNone(response)
 
 

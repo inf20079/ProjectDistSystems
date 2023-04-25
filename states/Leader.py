@@ -9,28 +9,24 @@ from states.State import State
 
 class Leader(State):
 
-    def __init__(self):
+    def __init__(self, node):
+        super().__init__(node)
         self.nextIndex = {}  # for each server, index of the next log entry to send to that server
         self.matchIndex = {}  # for each server, index of highest log entry known to be replicated on server
-        self.heartbeatTimeout = 0.1
+        self.heartbeatTimeout = 10
         self.heartbeatActive = True
         self.recurringProcedure = RecurringProcedure(self.heartbeatTimeout, self.sendHeartbeat)
-
-    def setNode(self, node):
-        print(f"[{node.id}](Leader) setNode")
-        super().setNode(node)
 
         # Upon election: send initial heartbeat
         self.sendHeartbeat()
         self.recurringProcedure.start()
 
-
     def onResponseReceived(self, message: AppendEntriesResponse):
-        print(f"[{self.node.id}](Leader) onResponseReceived")
+        print(f"[{self.node.id}](Leader) onResponseReceived: {message}")
 
-        if message.senderID not in self.nextIndex:
+        if message.senderID not in self.nextIndex.keys():
             self.nextIndex[message.senderID] = self.node.lastLogIndex() + 1
-        if message.senderID not in self.matchIndex:
+        if message.senderID not in self.matchIndex.keys():
             self.matchIndex[message.senderID] = 0
 
         if not message.success:
@@ -49,15 +45,14 @@ class Leader(State):
                 prevLogTerm=previous.term,
                 entries=[current]
             )
-            return self, appendEntry
+            return self.__class__, appendEntry
         else:
             self.nextIndex[message.senderID] += 1
-            print(self.nextIndex[message.senderID])
 
             if self.nextIndex[message.senderID] > self.node.lastLogIndex():
                 self.nextIndex[message.senderID] = self.node.lastLogIndex()
 
-            return self, None
+            return self.__class__, None
 
     def sendHeartbeat(self):
         print(f"[{self.node.id}](Leader) sendHeartbeat")
@@ -73,10 +68,9 @@ class Leader(State):
         self.node.sendMessageBroadcast(message)
         self.recurringProcedure.resetTimeout()
 
-
     def onVoteRequestReceived(self, message: RequestVoteMessage):
-        return self, self.generateVoteResponseMessage(message, False)
+        return self.__class__, self.generateVoteResponseMessage(message, False)
 
     def shutdown(self):
-        print(f"[{self.node.id}](Leader) shutdown")
+        # print(f"[{self.node.id}](Leader) shutdown")
         self.recurringProcedure.shutdown()

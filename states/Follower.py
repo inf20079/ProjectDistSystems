@@ -4,8 +4,8 @@ from states.Voter import Voter
 
 class Follower(Voter):
 
-    def __init__(self):
-        Voter.__init__(self)
+    def __init__(self, node):
+        super().__init__(node)
         self.leaderID = None
 
     def onAppendEntries(self, message: AppendEntriesRequest):
@@ -13,7 +13,7 @@ class Follower(Voter):
         return super().onAppendEntries(message)
 
     def onElectionTimeouted(self):
-        print(f"[{self.node.id}](Follower) onElectionTimeouted")
+        # print(f"[{self.node.id}](Follower) onElectionTimeouted")
         from states.Candidate import Candidate
-        self.node.manuallySwitchState(Candidate())
+        self.node.manuallySwitchState(Candidate)
 

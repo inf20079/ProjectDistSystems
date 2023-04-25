@@ -21,6 +21,7 @@ def argparser():
 
     return args
 
+
 def main():
     args = argparser()
 
@@ -34,10 +35,12 @@ def main():
 
     # Convert the ports string to a list of integers
     memberStr = config.get('cluster', 'memberList', fallback='').split(',')
-    members = [Member(id=int(id), port=int(config.get(str(id), "port")), host=config.get(str(id), "ip")) for id in memberStr]
+    members = [Member(id=int(id), port=int(config.get(str(id), "port")), host=config.get(str(id), "ip")) for id in
+               memberStr]
     peers = [member for member in members if member.id != args.id]
 
-    node = Node(state=Follower(), id=args.id, ipAddress=str(ip), unicastPort=int(port), broadcastPort=int(broadcastPort), peers=peers)
+    node = Node(stateClass=Follower, id=args.id, ipAddress=str(ip), unicastPort=int(port),
+                broadcastPort=int(broadcastPort), peers=peers)
 
     try:
         while True:

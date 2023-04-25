@@ -6,12 +6,11 @@ from states.Voter import Voter
 
 class Candidate(Voter):
 
-    def setNode(self, node):
-        print(f"[{node.id}](Candidate) setNode")
-        super().setNode(node)
+    def __init__(self, node):
+        super().__init__(node)
 
         if len(self.node.peers) == 0:
-            node.manuallySwitchState(Leader())
+            node.manuallySwitchState(Leader)
             return
 
         self.votesReceived = 0
@@ -19,17 +18,15 @@ class Candidate(Voter):
 
     def onAppendEntries(self, message: AppendEntriesRequest):
         state, response = super().onAppendEntries(message)
-        return Follower(), response
+        return Follower, response
 
     def onVoteResponseReceived(self, message: ResponseVoteMessage):
-        print(f"[{self.node.id}](Candidate) onVoteResponseReceived")
-
-        print(self.votesReceived)
+        # print(f"[{self.node.id}](Candidate) onVoteResponseReceived")
 
         # Check if the message's term is greater than the candidate's current term
         if message.term > self.node.currentTerm:
             print(f"[{self.node.id}](Candidate) onVoteResponseReceived: higher term")
-            return Follower(), None
+            return Follower, None
 
         # If the vote was granted, increment the vote count and check if the candidate
         # has received votes from a majority of the cluster
@@ -38,14 +35,14 @@ class Candidate(Voter):
             print(f"[{self.node.id}](Candidate) onVoteResponseReceived: vote granted")
             if self.votesReceived > len(self.node.peers) // 2:
                 print(f"[{self.node.id}](Candidate) onVoteResponseReceived: majority votes")
-                return Leader(), None
-            return self, None
+                return Leader, None
+            return self.__class__, None
 
         print(f"[{self.node.id}](Candidate) onVoteResponseReceived: vote not granted")
-        return self, None
+        return self.__class__, None
 
     def onElectionTimeouted(self):
-        # print(f"[{self.node.id}](Candidate) onElectionTimeouted")
+        print(f"[{self.node.id}](Candidate) onElectionTimeouted")
         self.startElection()
 
     def startElection(self):
@@ -62,6 +59,7 @@ class Candidate(Voter):
         self.node.currentTerm += 1
         self.votedFor = self.node.id
         self.votesReceived = 1
+        print(f"[{self.node.id}](Candidate) startElection: {self.node.currentTerm=}")
 
         # Send RequestVoteMessage messages to all other nodes in the cluster
         requestVoteMessage = RequestVoteMessage(

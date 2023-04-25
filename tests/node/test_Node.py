@@ -9,7 +9,7 @@ class TestNode(unittest.TestCase):
     @patch('socket.gethostname', return_value='localhost')
     @patch('socket.gethostbyname', return_value='127.0.0.1')
     def setUp(self, mock_gethostname, mock_gethostbyname):
-        self.node = Node(id=1, state=MagicMock())
+        self.node = Node(id=1, stateClass=MagicMock())
 
     def test_send_message_broadcast(self):
         message = "Hello, world!"
