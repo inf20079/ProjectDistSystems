@@ -13,9 +13,9 @@ class Leader(State):
         super().__init__(node)
         self.nextIndex = {}  # for each server, index of the next log entry to send to that server
         self.matchIndex = {}  # for each server, index of highest log entry known to be replicated on server
-        self.heartbeatTimeout = 10
-        self.heartbeatActive = True
-        self.recurringProcedure = RecurringProcedure(self.heartbeatTimeout, self.sendHeartbeat)
+
+        heartbeatTimeout = 0.1
+        self.recurringProcedure = RecurringProcedure(heartbeatTimeout, self.sendHeartbeat)
 
         # Upon election: send initial heartbeat
         self.sendHeartbeat()

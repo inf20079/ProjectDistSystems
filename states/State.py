@@ -19,9 +19,14 @@ class State:
         from states.Voter import Voter
 
         prevCurrentTerm = self.node.currentTerm
+        # If RPC request or response contains term T > currentTerm:
+        # set currentTerm = T
         if message.term > self.node.currentTerm:
             self.node.currentTerm = message.term  # Update here already, because we might need it in the subsequent
             # actions
+            if isinstance(self, Candidate):
+                self.shutdown()  # Already stop election timeout here, because it is running in a separate thread and
+                # might execute between here and the actual state-transition
 
         stateClass, response = self.__class__, None
 
@@ -31,19 +36,21 @@ class State:
             if isinstance(self, Leader):
                 stateClass, response = self.onResponseReceived(message)
             else:
-                print("instance not a leader")
+                print(f"[{self.node.id}](State) onMessage: instance not a leader")
         elif isinstance(message, RequestVoteMessage):
             stateClass, response = self.onVoteRequestReceived(message)
         elif isinstance(message, ResponseVoteMessage):
             if isinstance(self, Candidate):
                 stateClass, response = self.onVoteResponseReceived(message)
             else:
-                print("instance not a candidate")
+                print(f"[{self.node.id}](State) onMessage: instance not a candidate")
 
         # If RPC request or response contains term T > currentTerm:
         # convert to follower
         if message.term > prevCurrentTerm:
+            print(f"[{self.node.id}](State) onMessage: message.term > prevCurrentTerm")
             if not isinstance(self, Follower):
+                print(f"[{self.node.id}](State) onMessage: message.term > prevCurrentTerm")
                 stateClass = Follower
 
         if response is not None:

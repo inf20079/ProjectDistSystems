@@ -57,7 +57,7 @@ class Candidate(Voter):
 
         # Increment the current term and vote for self
         self.node.currentTerm += 1
-        self.votedFor = self.node.id
+        self.votedFor[self.node.currentTerm] = self.node.id
         self.votesReceived = 1
         print(f"[{self.node.id}](Candidate) startElection: {self.node.currentTerm=}")
 

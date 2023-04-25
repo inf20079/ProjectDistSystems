@@ -12,9 +12,10 @@ class Voter(State):
     def __init__(self, node):
         super().__init__(node)
         self.votedFor = {}  # dict: term -> candidate
-        self.electionTimeout = random.randrange(150, 300) / 10
-        self.electionActive = True
-        self.recurringProcedure = RecurringProcedure(self.electionTimeout, self.onElectionTimeouted)
+
+        electionTimeout = random.randrange(150, 300) / 1000
+        self.recurringProcedure = RecurringProcedure(electionTimeout, self.onElectionTimeouted)
+
         self.recurringProcedure.start()
 
     def onVoteRequestReceived(self, message: RequestVoteMessage):

@@ -95,7 +95,7 @@ class Node:
         if not inspect.isclass(stateClass):
             raise TypeError("ERROR: STATECLASS IS INSTANCE AND NOT CLASS")
         if not isinstance(self.state, stateClass):
-            print(f"manuallySwitchState: from {self.state.__class__} to {stateClass}")
+            print(f"[{self.id}](Node) manuallySwitchState: from {self.state.__class__} to {stateClass}")
             self.state.shutdown()
             self.state = stateClass(self)
 

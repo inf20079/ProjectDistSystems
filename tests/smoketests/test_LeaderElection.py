@@ -8,52 +8,59 @@ from typing import List
 from middleware.types.MessageTypes import Member
 from node.Node import Node
 from states.Follower import Follower
+from states.Leader import Leader
+from tests.smoketests.SmokeTest import SmokeTest
 
 
-class TestLeaderElection(unittest.TestCase):
+class TestLeaderElection(SmokeTest):
 
-    def setUp(self):
-        nodeCount = 3
-        self.nodes: List[Node] = []
+    def test_startToLeader(self):
+        """Start 3 nodes in the cluster (all Followers) and verify that only one node becomes leader"""
+        self.createNodes(types=[Follower, Follower, Follower])
 
-        config = configparser.ConfigParser()
-        config.read(os.getcwd() + os.sep + "/../../config/cluster.cfg")
+        maxDuration = 20
+        self.checkForDuration(
+            passCondition=lambda: sum(isinstance(node.state, Leader) for node in self.nodes) == 1,
+            maxDuration=maxDuration,
+            onFailedText=f"No Leader after {maxDuration} seconds."
+        )
 
-        print(config)
+    def test_onLeaderKilled(self):
+        """Start 3 nodes in the cluster (one Leader, two Followers), kill the current leader and verify that another
+        node becomes leader"""
 
-        broadcastPort = config.get("cluster", "broadcastPort")
+        self.createNodes(types=[Leader, Follower, Follower])
+        if sum(isinstance(node.state, Leader) for node in self.nodes) != 1:
+            self.fail("CANNOT START TEST: LEADER COUNT != 1")
 
-        memberStr = config.get('cluster', 'memberList', fallback='').split(',')
-        members = [Member(id=int(id), port=int(config.get(str(id), "port")), host=config.get(str(id), "ip")) for id in
-                   memberStr]
-        for i in range(nodeCount):
-            nodeID = i + 1
-            ip = config.get(str(nodeID), "ip")
-            port = config.get(str(nodeID), "port")
-            peers = [member for member in members if member.id != nodeID]
-            node = Node(stateClass=Follower, id=nodeID, ipAddress=str(ip), unicastPort=int(port),
-                        broadcastPort=int(broadcastPort), peers=peers)
-            self.nodes.append(node)
+        self.nodes[0].shutdown()
+        del self.nodes[0]
 
-        self.nodesLoopRunning = True
-        threading.Thread(
-            self.nodesLoop()
-        ).start()
+        maxDuration = 20
+        self.checkForDuration(
+            passCondition=lambda: sum(isinstance(node.state, Leader) for node in self.nodes) == 1,
+            maxDuration=maxDuration,
+            onFailedText=f"No node became Leader after {maxDuration} seconds."
+        )
 
-    def nodesLoop(self):
-        while self.nodesLoopRunning:
-            for node in self.nodes:
-                node.pollMessages()
-            sleep(0.0001)
+    def test_onNodeRestart(self):
+        """Start two nodes in the cluster (both Follower), wait for one to become Leader in a new term, restart the
+        third node (Leader) and verify that it becomes a Follower"""
 
-    def tearDown(self):
-        self.nodesLoopRunning = False
-        for node in self.nodes:
-            node.shutdown()
+        self.createNodes(types=[Follower, Follower])
 
-    def test_LeaderElection(self):
-        for i in range(60):
-            for node in self.nodes:
-                print(node.__class__)
-            sleep(1)
-        print("nah")
+        maxDuration = 20
+        self.checkForDuration(
+            passCondition=lambda: sum(isinstance(node.state, Leader) for node in self.nodes) == 1,
+            maxDuration=maxDuration,
+            onFailedText=f"No node became Leader after {maxDuration} seconds."
+        )
+
+        self.createSingleNode(nodeID=3, type=Leader)
+
+        maxDuration = 20
+        self.checkForDuration(
+            passCondition=lambda: self.nodes[2].id == 3 and isinstance(self.nodes[2].state, Follower),
+            maxDuration=maxDuration,
+            onFailedText=f"Restarted Leader didn't become Follower after {maxDuration} seconds."
+        )

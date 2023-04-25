@@ -2,11 +2,13 @@ import threading
 import time
 
 
+
 class RecurringProcedure:
+    TIMEOUT_SCALE = 1
 
     def __init__(self, timeout, onTimeouted):
         self.active = True
-        self.timeout = timeout
+        self.timeout = timeout * self.TIMEOUT_SCALE
         self.onTimeouted = onTimeouted
 
         self.nextTimeout = 0

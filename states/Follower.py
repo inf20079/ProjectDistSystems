@@ -13,7 +13,7 @@ class Follower(Voter):
         return super().onAppendEntries(message)
 
     def onElectionTimeouted(self):
-        # print(f"[{self.node.id}](Follower) onElectionTimeouted")
+        print(f"[{self.node.id}](Follower) onElectionTimeouted")
         from states.Candidate import Candidate
         self.node.manuallySwitchState(Candidate)
 
