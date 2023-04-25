@@ -60,6 +60,7 @@ class AppendEntriesRequest(Message):
     prevLogTerm: int  # The term of the prevLogIndex
     entries: List[LogEntry]  # A list of new log entries to be appended to the log
 
+    @classmethod
     def fromDict(cls, dict):
         """ object creation from dict
 
@@ -151,6 +152,7 @@ class ResponseDiscover:
         :rtype: coordinate dataclass
         """
         try:
+            print(dict)
             dict["memberList"] = [Member(**entry) for entry in dict["memberList"]]
             return cls(**dict)
         except KeyError as e:

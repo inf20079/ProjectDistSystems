@@ -11,7 +11,7 @@ class Voter(State):
 
     def __init__(self):
         self.votedFor = None
-        self.electionTimeout = 3  # random.randrange(150, 300) / 1000
+        self.electionTimeout = random.randrange(150, 300) / 1000
         self.electionActive = True
         self.recurringProcedure = RecurringProcedure(self.electionTimeout, self.onElectionTimeouted)
 

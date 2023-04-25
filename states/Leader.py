@@ -63,7 +63,7 @@ class Leader(State):
         print(f"[{self.node.id}](Leader) sendHeartbeat")
         message = AppendEntriesRequest(
             senderID=self.node.id,
-            receiverID=None,
+            receiverID=-1,
             term=self.node.currentTerm,
             commitIndex=self.node.commitIndex,
             prevLogIndex=len(self.node.log) - 1,
