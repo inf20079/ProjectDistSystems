@@ -9,7 +9,7 @@ class Follower(Voter):
         self.leaderID = None
 
     def onAppendEntries(self, message: AppendEntriesRequest):
-        self.resetElectionTimeout()
+        self.recurringProcedure.resetTimeout()
         return super().onAppendEntries(message)
 
     def onElectionTimeouted(self):

@@ -11,7 +11,7 @@ def main():
     for i in range(nodeCount):
         nodes.append(Node(i, Follower(),
                           unicastPort=12004 + i * 2,
-                          broadcastPort=12005 + i * 2)
+                          broadcastPort=12005)
                      )
 
     while True:

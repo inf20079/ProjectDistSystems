@@ -7,9 +7,9 @@ from middleware.BroadcastInterface import BroadcastInterface
 from middleware.MulticastPublisher import MulticastPublisher
 from middleware.UnicastListener import UnicastListener
 from middleware.UnicastPublisher import UnicastPublisher, Unicast
-from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Member, LogEntry
+from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Member, LogEntry, Message
 
-    
+
 class Node:
 
     def __init__(self, id, state, ipAddress=None, broadcastPort=None, unicastPort=None, peers=None, log=None):
@@ -83,9 +83,11 @@ class Node:
     def sendMessageMulticast(self, message: Any):
         self.multicastPub.appendMessage(message)
 
-    def sendMessageUnicast(self, message: Any):
+    def sendMessageUnicast(self, message: Message):
         print(f"[{self.id}](Node) sendMessageUnicast")
-        self.unicastPub.appendMessage(message)
+        receiver = self.getIpByID(message.receiverID)
+        unicast = Unicast(receiver.host, receiver.port, message)
+        self.unicastPub.appendMessage(unicast)
 
     def manuallySwitchState(self, state):
         if self.state is not state:
@@ -105,7 +107,7 @@ class Node:
 
         return state, response
 
-    def getIpByID(self, id: int):
+    def getIpByID(self, id: int) -> Member:
         return [member for member in self.peers if member.id == id]
 
     def sendDiscovery(self):
