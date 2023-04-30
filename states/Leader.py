@@ -2,7 +2,8 @@ import threading
 import time
 from collections import defaultdict
 
-from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse, RequestVoteMessage, LogEntry
+from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse, RequestVoteMessage, LogEntry, \
+    ClientRequestMessage
 from node.RecurringProcedure import RecurringProcedure
 from states.State import State
 
@@ -20,6 +21,49 @@ class Leader(State):
         # Upon election: send initial heartbeat
         self.sendHeartbeat()
         self.recurringProcedure.start()
+
+    def onClientRequestReceived(self, message: ClientRequestMessage):
+        print(f"[{self.node.id}](Leader) onClientRequestReceived: {message}")
+
+        # ToDo: Logic
+
+        newEntries = [
+            LogEntry(
+                term=self.node.currentTerm,
+                action="Give you up"
+            ),
+            LogEntry(
+                term=self.node.currentTerm,
+                action="Let you down"
+            ),
+            LogEntry(
+                term=self.node.currentTerm,
+                action="Run around"
+            ),
+            LogEntry(
+                term=self.node.currentTerm,
+                action="Desert you"
+            )
+        ]
+
+        prevLogIndex = self.node.lastLogIndex()
+        prevLogTerm = self.node.lastLogTerm()
+
+        self.node.log += newEntries
+        self.node.commitIndex = self.node.lastLogIndex()
+
+        appendEntriesMessage = AppendEntriesRequest(
+            senderID=self.node.id,
+            receiverID=-1,
+            term=self.node.currentTerm,
+            commitIndex=self.node.commitIndex,
+            prevLogIndex=prevLogIndex,
+            prevLogTerm=prevLogTerm,
+            entries=newEntries
+        )
+        self.node.sendMessageBroadcast(appendEntriesMessage)
+
+        return self.__class__, None
 
     def onResponseReceived(self, message: AppendEntriesResponse):
         print(f"[{self.node.id}](Leader) onResponseReceived: {message}")

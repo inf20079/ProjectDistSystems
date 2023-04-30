@@ -14,7 +14,7 @@ from states.Follower import Follower
 class SmokeTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        RecurringProcedure.TIMEOUT_SCALE = 10
+        RecurringProcedure.TIMEOUT_SCALE = 100
 
     def createNodes(self, types):
         nodeCount = len(types)

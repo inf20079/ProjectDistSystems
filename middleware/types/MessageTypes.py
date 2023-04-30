@@ -156,3 +156,13 @@ class ResponseDiscover:
             return cls(**dict)
         except KeyError as e:
             raise e
+
+@dataclass(frozen=True)
+class ClientRequestMessage:
+    """Request from Client to Leader"""
+    blablabla: float
+
+@dataclass(frozen=True)
+class ClientResponseMessage:
+    """Respons from Leader to Client"""
+    blablabla: float

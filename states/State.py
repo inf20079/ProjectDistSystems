@@ -36,7 +36,7 @@ class State:
             if isinstance(self, Leader):
                 stateClass, response = self.onResponseReceived(message)
             else:
-                print(f"[{self.node.id}](State) onMessage: instance not a leader")
+                print(f"[{self.node.id}](State) onMessage / AppendEntriesResponse: instance not a leader")
         elif isinstance(message, RequestVoteMessage):
             stateClass, response = self.onVoteRequestReceived(message)
         elif isinstance(message, ResponseVoteMessage):
@@ -100,7 +100,7 @@ class State:
         # min(leaderCommit, index of last new entry)
         if message.commitIndex > self.node.commitIndex:
             self.node.commitIndex = min(
-                message.commitIndex, len(self.node.log) - 1
+                message.commitIndex, self.node.lastLogIndex()
             )
 
         # Send a success message
