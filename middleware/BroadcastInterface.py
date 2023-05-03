@@ -23,7 +23,6 @@ class BroadcastInterface(AbstractSocketInterface):
 
     def onReadable(self):
         data, address = self.socket.recvfrom(1024)
-        print(data)
         if not data:
             return
         message = json.loads(data.decode())

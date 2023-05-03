@@ -1,0 +1,40 @@
+version: '3'
+services:
+  node1:
+    build: .
+    environment:
+      ID: 0
+      CLUSTERSIZE: 3
+      NODE1: "10.5.0.5"
+      NODE2: "10.5.0.6"
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.4
+  node2:
+    build: .
+    environment:
+      ID: 1
+      CLUSTERSIZE: 3
+      NODE0: "10.5.0.4"
+      NODE2: "10.5.0.6"
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.5
+  node3:
+    build: .
+    environment:
+      ID: 2
+      CLUSTERSIZE: 3
+      NODE0: "10.5.0.4"
+      NODE1: "10.5.0.5"
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.6
+
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1

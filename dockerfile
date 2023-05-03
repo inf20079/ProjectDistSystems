@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9-slim-buster
+FROM python:3.11-slim-buster
 
 # Set the working directory to /app
 WORKDIR /app
@@ -7,8 +7,5 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
-
 # Set the entrypoint to run the app.py script
-ENTRYPOINT ["python", "node.py"]
+ENTRYPOINT ["python", "server.py"]
