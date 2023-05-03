@@ -1,5 +1,6 @@
-import configparser
 import os
+import socket
+from time import sleep
 
 from middleware.types.MessageTypes import Member
 from node.Node import Node
@@ -8,23 +9,27 @@ from states.Follower import Follower
 
 def main():
 
-    # config
-    config = configparser.ConfigParser()
-    config.read(os.getcwd() + os.sep + args.config)
+    # Get the hostname of the machine
+    hostname = socket.gethostname()
+    # Get the IP address associated with the hostname
+    ip = socket.gethostbyname(hostname)
+    # Get the ID of the node
+    id = int(os.environ.get("ID"))
+    # Configuration of used ports
+    port = 14001
+    broadcastPort = 14000
+    # Generate peers
+    clusterSize = int(os.environ.get('CLUSTERSIZE'))
+    peers = [Member(id=i, port=14001, host=str(os.environ.get(f"NODE{i}")))
+             for i in range(clusterSize) if i != id]
+    # print config
+    print(f"[{id}] Config: id={id}, ip={ip}, port={port}, broadcastPort={broadcastPort}, clusterSize={clusterSize}")
+    print(f"[{id}] Peers: {peers}")
 
-    ip = config.get(str(args.id), "ip")
-    port = config.get(str(args.id), "port")
-    broadcastPort = config.get("cluster", "broadcastPort")
-
-    # Convert the ports string to a list of integers
-    memberStr = config.get('cluster', 'memberList', fallback='').split(',')
-    members = [Member(id=int(id), port=int(config.get(str(id), "port")), host=config.get(str(id), "ip")) for id in
-               memberStr]
-    peers = [member for member in members if member.id != args.id]
-
-    node = Node(stateClass=Follower, id=args.id, ipAddress=str(ip), unicastPort=int(port),
-                broadcastPort=int(broadcastPort), peers=peers)
-
+    # Create node
+    node = Node(stateClass=Follower, id=id, ipAddress=str(ip), unicastPort=port,
+                broadcastPort=broadcastPort, peers=peers)
+    # run logic
     try:
         while True:
             node.pollMessages()
