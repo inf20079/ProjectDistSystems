@@ -2,6 +2,7 @@ import json
 import threading
 from datetime import datetime
 import random
+from time import sleep
 from typing import Tuple, List
 
 from client.Map import Map
@@ -30,6 +31,7 @@ class Client(threading.Thread):
         self.endTime = None
 
     def run(self) -> None:
+        self.setStartTime()
         while not self.destinationReached and not self.stopEvent.is_set():
             self.unicastInterface.refresh()
             message = self.unicastInterface.popMessage()
@@ -66,3 +68,13 @@ class Client(threading.Thread):
 
     def shutdown(self):
         self.stopEvent.set()
+
+    def __del__(self):
+        self.stopEvent.set()
+
+
+if __name__ == "__main__":
+    client = Client(Coordinate(5, 5), [("localhost", 14010)], "localhost", 14009, 100, 100, 0)
+    client.start()
+    sleep(5)
+    client.shutdown()
