@@ -182,16 +182,6 @@ class ResponseDiscover:
         except KeyError as e:
             raise TypeError(str(e))
 
-@dataclass(frozen=True)
-class ClientRequestMessage:
-    """Request from Client to Leader"""
-    blablabla: float
-
-@dataclass(frozen=True)
-class ClientResponseMessage:
-    """Respons from Leader to Client"""
-    blablabla: float
-
 
 @dataclass(frozen=True)
 class NavigationRequest:

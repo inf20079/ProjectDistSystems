@@ -18,7 +18,7 @@ class TestVoter(unittest.TestCase):
 
     def test_onVoteRequestReceived_votedFor_is_None(self):
         message = RequestVoteMessage(senderID=1, receiverID=0, term=1, lastLogIndex=9, lastLogTerm=1)
-        stateClass, response = self.voter.onMessage(message)
+        stateClass, response = self.voter.onRaftMessage(message)
 
         self.assertEqual(stateClass, Voter)
         self.assertTrue(response.voteGranted)
@@ -27,7 +27,7 @@ class TestVoter(unittest.TestCase):
     def test_onVoteRequestReceived_votedFor_is_not_None(self):
         message = RequestVoteMessage(senderID=1, receiverID=0, term=1, lastLogIndex=9, lastLogTerm=1)
         self.voter.votedFor[1] = 2
-        stateClass, response = self.voter.onMessage(message)
+        stateClass, response = self.voter.onRaftMessage(message)
 
         self.assertEqual(stateClass, Voter)
         self.assertFalse(response.voteGranted)
@@ -35,7 +35,7 @@ class TestVoter(unittest.TestCase):
 
     def test_onVoteRequestReceived_less_up_to_date_log(self):
         message = RequestVoteMessage(senderID=1, receiverID=0, term=1, lastLogIndex=8, lastLogTerm=1)
-        stateClass, response = self.voter.onMessage(message)
+        stateClass, response = self.voter.onRaftMessage(message)
 
         self.assertEqual(stateClass, Voter)
         self.assertFalse(response.voteGranted)

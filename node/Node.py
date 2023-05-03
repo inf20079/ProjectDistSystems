@@ -4,9 +4,12 @@ import time
 from socket import gethostname, gethostbyname
 from typing import Any
 
+from control.TrafficArea import TrafficArea
+from control.TrafficControlLogic import TrafficControlLogic
 from middleware.BroadcastInterface import BroadcastInterface
 from middleware.UnicastInterface import UnicastInterface, Unicast
-from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Member, LogEntry, Message
+from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Member, LogEntry, Message, \
+    NavigationRequest
 
 
 class Node:
@@ -38,6 +41,9 @@ class Node:
         self.state = stateClass(self)
         print(self.state)
 
+        # logic
+        self.trafficControlLogic = TrafficControlLogic(TrafficArea(2, 1000, 1000))
+
     def pollMessages(self):
         self.unicastInterface.refresh()
         self.broadcastInterface.refresh()
@@ -45,7 +51,9 @@ class Node:
         def handleQueue(interface):
             message = interface.popMessage()
             while message is not None:
-                if message.senderID is not self.id:
+                if isinstance(message, NavigationRequest):
+                    self.state.onClientRequestReceived(message)
+                elif message.senderID is not self.id:
                     if isinstance(message, RequestDiscover):
                         self.onDiscoveryRequest(message)
                     elif isinstance(message, ResponseDiscover):
@@ -88,7 +96,7 @@ class Node:
 
     def onRaftMessage(self, message):
         print(f"[{self.id}](Node) onRaftMessage from {message.senderID} to {message.receiverID}")
-        stateClass, response = self.state.onMessage(message=message)
+        stateClass, response = self.state.onRaftMessage(message=message)
 
         if response is not None:
             self.sendMessageUnicast(response)

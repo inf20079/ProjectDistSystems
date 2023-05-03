@@ -20,7 +20,7 @@ class Client(threading.Thread):
         self.port = port
         self.destination = destination
         self.destinationReached = False
-        self.currentPosition = None
+        self.currentPosition = Coordinate(None, None)
         self.stopEvent = threading.Event()
         # Map
         self.map = Map((destination.x, destination.y), sizeX, sizeY)
@@ -32,6 +32,7 @@ class Client(threading.Thread):
 
     def run(self) -> None:
         self.setStartTime()
+        self.requestNavigation()
         while not self.destinationReached and not self.stopEvent.is_set():
             self.unicastInterface.refresh()
             message = self.unicastInterface.popMessage()
@@ -49,9 +50,10 @@ class Client(threading.Thread):
         print(f"At time {self.getTimeDiff()} at position {self.currentPosition}.")
 
     def requestNavigation(self):
+        print(f"[C] Request Navigation")
         serverAdress = random.choice(self.serverList)
         message = NavigationRequest(self.id, self.currentPosition, self.destination)
-        unicast = Unicast(serverAdress[0], serverAdress[{1}], message)
+        unicast = Unicast(serverAdress[0], serverAdress[1], message)
         self.unicastInterface.appendMessage(unicast)
 
     def setStartTime(self):

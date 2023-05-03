@@ -2,7 +2,7 @@ import random
 import threading
 import time
 
-from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage
+from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage, NavigationRequest
 from node.RecurringProcedure import RecurringProcedure
 from states.State import State
 
@@ -39,6 +39,9 @@ class Voter(State):
         print(f"[{self.node.id}](Voter) onVoteRequestReceived: voting for candidate")
 
         return self.__class__, self.generateVoteResponseMessage(message, True)
+
+    def onClientRequestReceived(self, message: NavigationRequest):
+        print(f"hallo freunde")
 
     def onElectionTimeouted(self):
         """Must be implemented in children"""

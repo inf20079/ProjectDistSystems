@@ -64,7 +64,11 @@ class UnicastInterface(AbstractSocketInterface):
             return
         for message in sendQueue:
             message_json = json.dumps(message, cls=EnhancedJSONEncoder).encode()
-            sock.sendall(message_json)
+            try:
+                sock.sendall(message_json)
+            except ConnectionResetError as e:
+                print(f"{e}")
+                break
         del self.sendQueue[remoteAddress+str(remotePort)]
         self.clientSockets.remove(sock)
 

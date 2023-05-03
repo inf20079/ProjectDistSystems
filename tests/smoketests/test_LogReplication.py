@@ -1,4 +1,7 @@
-from middleware.types.MessageTypes import ClientRequestMessage
+from time import sleep
+
+from client.Client import Client
+from middleware.types.MessageTypes import Coordinate
 from states.Follower import Follower
 from states.Leader import Leader
 from tests.smoketests.SmokeTest import SmokeTest
@@ -11,8 +14,10 @@ class TestLogReplication(SmokeTest):
         followers"""
         self.createNodes(types=[Leader, Follower, Follower])
 
-        message = ClientRequestMessage(blablabla=1)
-        self.nodes[0].state.onClientRequestReceived(message)
+        sleep(5)
+
+        client = Client(Coordinate(5, 5), [(self.nodes[0].ipAddress, self.nodes[0].unicastPort)], "localhost", 14009, 100, 100, 0)
+        client.start()
 
         maxDuration = 20
         self.checkForDuration(

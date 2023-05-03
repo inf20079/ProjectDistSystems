@@ -8,7 +8,7 @@ class State:
     def __init__(self, node):
         self.node = node
 
-    def onMessage(self, message: Message):
+    def onRaftMessage(self, message: Message):
         """Called when a message is received.
         Calls an appropriate other method as a reaction."""
 
@@ -50,7 +50,6 @@ class State:
         if message.term > prevCurrentTerm:
             print(f"[{self.node.id}](State) onMessage: message.term > prevCurrentTerm")
             if not isinstance(self, Follower):
-                print(f"[{self.node.id}](State) onMessage: message.term > prevCurrentTerm")
                 stateClass = Follower
 
         if response is not None:

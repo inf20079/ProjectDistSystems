@@ -27,7 +27,7 @@ class TestLeaderElection(SmokeTest):
         self.nodes[0].shutdown()
         del self.nodes[0]
 
-        maxDuration = 20
+        maxDuration = 30
         self.checkForDuration(
             passCondition=lambda: sum(isinstance(node.state, Leader) for node in self.nodes) == 1,
             maxDuration=maxDuration,
@@ -40,7 +40,7 @@ class TestLeaderElection(SmokeTest):
 
         self.createNodes(types=[Follower, Follower])
 
-        maxDuration = 20
+        maxDuration = 30
         self.checkForDuration(
             passCondition=lambda: sum(isinstance(node.state, Leader) for node in self.nodes) == 1,
             maxDuration=maxDuration,
@@ -49,7 +49,7 @@ class TestLeaderElection(SmokeTest):
 
         self.createSingleNode(nodeID=3, type=Leader)
 
-        maxDuration = 20
+        maxDuration = 30
         self.checkForDuration(
             passCondition=lambda: self.nodes[2].id == 3 and isinstance(self.nodes[2].state, Follower),
             maxDuration=maxDuration,

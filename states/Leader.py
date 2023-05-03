@@ -1,9 +1,10 @@
+import json
 import threading
 import time
 from collections import defaultdict
 
-from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse, RequestVoteMessage, LogEntry, \
-    ClientRequestMessage
+from middleware.types.JsonCoding import EnhancedJSONEncoder
+from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse, RequestVoteMessage, LogEntry, NavigationRequest
 from node.RecurringProcedure import RecurringProcedure
 from states.State import State
 
@@ -15,6 +16,8 @@ class Leader(State):
         self.nextIndex = {}  # for each server, index of the next log entry to send to that server
         self.matchIndex = {}  # for each server, index of highest log entry known to be replicated on server
 
+        self.newEntries = []
+
         heartbeatTimeout = 0.1
         self.recurringProcedure = RecurringProcedure(heartbeatTimeout, self.sendHeartbeat)
 
@@ -22,46 +25,17 @@ class Leader(State):
         self.sendHeartbeat()
         self.recurringProcedure.start()
 
-    def onClientRequestReceived(self, message: ClientRequestMessage):
+    def onClientRequestReceived(self, message: NavigationRequest):
         print(f"[{self.node.id}](Leader) onClientRequestReceived: {message}")
 
-        # ToDo: Logic
-
-        newEntries = [
-            LogEntry(
-                term=self.node.currentTerm,
-                action="Give you up"
-            ),
-            LogEntry(
-                term=self.node.currentTerm,
-                action="Let you down"
-            ),
-            LogEntry(
-                term=self.node.currentTerm,
-                action="Run around"
-            ),
-            LogEntry(
-                term=self.node.currentTerm,
-                action="Desert you"
-            )
-        ]
-
-        prevLogIndex = self.node.lastLogIndex()
-        prevLogTerm = self.node.lastLogTerm()
-
-        self.node.log += newEntries
-        self.node.commitIndex = self.node.lastLogIndex()
-
-        appendEntriesMessage = AppendEntriesRequest(
-            senderID=self.node.id,
-            receiverID=-1,
+        newEntry = LogEntry(
             term=self.node.currentTerm,
-            commitIndex=self.node.commitIndex,
-            prevLogIndex=prevLogIndex,
-            prevLogTerm=prevLogTerm,
-            entries=newEntries
+            action=json.dumps(message, cls=EnhancedJSONEncoder)
         )
-        self.node.sendMessageBroadcast(appendEntriesMessage)
+        self.newEntries.append(newEntry)
+
+        self.node.log += newEntry  # ToDo: This should only happen after commit right?
+        self.node.commitIndex = self.node.lastLogIndex()
 
         return self.__class__, None
 
@@ -73,30 +47,31 @@ class Leader(State):
         if message.senderID not in self.matchIndex.keys():
             self.matchIndex[message.senderID] = 0
 
-        if not message.success:
-            self.nextIndex[message.senderID] -= 1
+        if not message.success:  # AppendEntries did not succeed
+            if self.node.lastLogIndex() > -1:  # We can actually send a past log (maybe we just shouldn't be the Leader)
+                self.nextIndex[message.senderID] -= 1
 
-            previousIndex = max(0, self.nextIndex[message.senderID] - 1)
-            previous = self.node.log[previousIndex]
-            current = self.node.log[self.nextIndex[message.senderID]]
+                previousIndex = max(0, self.nextIndex[message.senderID] - 1)
+                previous = self.node.log[previousIndex]
+                current = self.node.log[self.nextIndex[message.senderID]]
 
-            appendEntry = AppendEntriesRequest(
-                senderID=self.node.id,
-                receiverID=message.senderID,
-                term=self.node.currentTerm,
-                commitIndex=self.node.commitIndex,
-                prevLogIndex=previousIndex,
-                prevLogTerm=previous.term,
-                entries=[current]
-            )
-            return self.__class__, appendEntry
-        else:
-            self.nextIndex[message.senderID] += 1
+                appendEntry = AppendEntriesRequest(
+                    senderID=self.node.id,
+                    receiverID=message.senderID,
+                    term=self.node.currentTerm,
+                    commitIndex=self.node.commitIndex,
+                    prevLogIndex=previousIndex,
+                    prevLogTerm=previous.term,
+                    entries=[current]
+                )
+                return self.__class__, appendEntry
 
-            if self.nextIndex[message.senderID] > self.node.lastLogIndex():
-                self.nextIndex[message.senderID] = self.node.lastLogIndex()
+        self.nextIndex[message.senderID] += 1
 
-            return self.__class__, None
+        if self.nextIndex[message.senderID] > self.node.lastLogIndex():
+            self.nextIndex[message.senderID] = self.node.lastLogIndex()
+
+        return self.__class__, None
 
     def sendHeartbeat(self):
         print(f"[{self.node.id}](Leader) sendHeartbeat")
@@ -107,8 +82,9 @@ class Leader(State):
             commitIndex=self.node.commitIndex,
             prevLogIndex=len(self.node.log) - 1,
             prevLogTerm=self.node.lastLogTerm(),
-            entries=[]
+            entries=self.newEntries
         )
+        self.newEntries = []
         self.node.sendMessageBroadcast(message)
         self.recurringProcedure.resetTimeout()
 
