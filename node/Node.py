@@ -1,14 +1,11 @@
 import inspect
-import logging
 import threading
 import time
 from socket import gethostname, gethostbyname
 from typing import Any
 
 from middleware.BroadcastInterface import BroadcastInterface
-from middleware.MulticastPublisher import MulticastPublisher
-from middleware.UnicastListener import UnicastListener
-from middleware.UnicastPublisher import UnicastPublisher, Unicast
+from middleware.UnicastInterface import UnicastInterface, Unicast
 from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Member, LogEntry, Message
 
 
@@ -21,15 +18,7 @@ class Node:
         self.unicastPort = unicastPort or 12005
         ## Interface
         self.broadcastInterface = BroadcastInterface(self.broadcastPort)
-        self.broadcastInterface.start()
-        ## publisher
-        self.multicastPub = MulticastPublisher()
-        self.multicastPub.start()
-        self.unicastPub = UnicastPublisher()
-        self.unicastPub.start()
-        ## listener
-        self.unicastList = UnicastListener(host=self.ipAddress, port=self.unicastPort)
-        self.unicastList.start()
+        self.unicastInterface = UnicastInterface(serverIp=self.ipAddress, serverPort=self.unicastPort)
 
         # raft
         self.id = id
@@ -50,6 +39,9 @@ class Node:
         print(self.state)
 
     def pollMessages(self):
+        self.unicastInterface.refresh()
+        self.broadcastInterface.refresh()
+
         def handleQueue(interface):
             message = interface.popMessage()
             while message is not None:
@@ -62,15 +54,13 @@ class Node:
                         self.onRaftMessage(message)
                 message = interface.popMessage()
 
-        handleQueue(self.unicastList)
+        handleQueue(self.unicastInterface)
         handleQueue(self.broadcastInterface)
-
 
     def periodicDiscovery(self):
         while self.isPeriodicDiscoveryActive:
             self.sendDiscovery()
             time.sleep(self.discoveryInterval)
-
 
     def lastLogIndex(self):
         return len(self.log) - 1 if len(self.log) > 0 else -1
@@ -82,14 +72,11 @@ class Node:
         print(f"[{self.id}](Node) sendMessageBroadcast")
         self.broadcastInterface.appendMessage(message)
 
-    def sendMessageMulticast(self, message: Any):
-        self.multicastPub.appendMessage(message)
-
-    def sendMessageUnicast(self, message: Message):
+    def sendMessageUnicast(self, message: Any):
         print(f"[{self.id}](Node) sendMessageUnicast: {message.receiverID=}")
         receiver = self.getIpByID(message.receiverID)
         unicast = Unicast(receiver.host, receiver.port, message)
-        self.unicastPub.appendMessage(unicast)
+        self.unicastInterface.appendMessage(unicast)
 
     def manuallySwitchState(self, stateClass):
         if not inspect.isclass(stateClass):
@@ -129,14 +116,4 @@ class Node:
 
     def shutdown(self):
         self.state.shutdown()
-
-        self.multicastPub.shutdown()
-        self.multicastPub.join()
-        self.unicastPub.shutdown()
-        self.unicastPub.join()
-        self.broadcastInterface.shutdown()
-        self.broadcastInterface.join()
-        self.unicastList.shutdown()
-        self.unicastList.join()
-
         self.isPeriodicDiscoveryActive = False

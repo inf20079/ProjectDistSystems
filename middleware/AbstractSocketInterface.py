@@ -1,13 +1,12 @@
 import abc
-from queue import Queue
-import threading
 import socket
+from typing import Any
 
 from middleware.types.MessageTypes import *
 
 
-class AbstractSocketListener(abc.ABC, threading.Thread):
-    def __init__(self, host: str, port: int):
+class AbstractSocketInterface(abc.ABC):
+    def __init__(self, serverIp: str, serverPort: int):
         """ Instantiates AbstractSocketListener: listens on port for incoming messages.
 
         :param host: IPv4 Adress
@@ -15,13 +14,11 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
         :param port: Port
         :type port: int
         """
-        threading.Thread.__init__(self)
-        self.host = host
-        self.port = port
+        self.ip = "127.0.0.1" if serverPort == "localhost" else serverIp
+        self.port = serverPort
         self.socket = self.configureSocket()
-        self.client_threads = []
-        self.message_queue = Queue()
-        self.stop_event = threading.Event()
+        self.receiveQueue = []
+        self.sendQueue = []
 
     @abc.abstractmethod
     def configureSocket(self) -> socket.socket:
@@ -33,10 +30,25 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
         :return: Dataclass element
         :rtype: dataclass
         """
-        if self.message_queue.empty():
+        try:
+            return self.receiveQueue.pop(0)
+        except IndexError:
             return None
-        else:
-            return self.message_queue.get()
+
+    def appendMessage(self, message: Any):
+        self.sendQueue.append(message)
+
+    @abc.abstractmethod
+    def onReadable(self):
+        pass
+
+    @abc.abstractmethod
+    def onWritable(self):
+        pass
+
+    @abc.abstractmethod
+    def refresh(self):
+        pass
 
     @staticmethod
     def parseMessage(message):
@@ -58,7 +70,7 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
             pass
         try:
             return AppendEntriesRequest.fromDict(message)
-        except TypeError and KeyError:
+        except TypeError:
             pass
         try:
             return AppendEntriesResponse.fromDict(message)
@@ -84,11 +96,11 @@ class AbstractSocketListener(abc.ABC, threading.Thread):
             return ResponseDiscover.fromDict(message)
         except TypeError:
             pass
-
-    @abc.abstractmethod
-    def run(self):
-        pass
-
-    def shutdown(self):
-        self.socket.close()
-        self.stop_event.set()
+        try:
+            return NavigationRequest.fromDict(message)
+        except TypeError:
+            pass
+        try:
+            return NavigationResponse.fromDict(message)
+        except TypeError:
+            pass

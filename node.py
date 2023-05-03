@@ -10,7 +10,7 @@ from states.Follower import Follower
 
 def argparser():
     # Create the parser
-    parser = argparse.ArgumentParser(description="Connect to a server")
+    parser = argparse.ArgumentParser(description="Node")
 
     # Add arguments
     parser.add_argument("-id", "--node_id", dest="id", type=int, help="The id of the node")

@@ -1,11 +1,22 @@
 from dataclasses import dataclass
-from typing import List, Tuple, Set
+from typing import List, Set
 
 
 @dataclass(frozen=True)
 class LogEntry:
     term: int
     action: str
+
+    @classmethod
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        return cls(**dict)
 
     def __repr__(self):
         return f"LogEntry({self.term=}, {self.action=})"
@@ -31,6 +42,11 @@ class Coordinate:
     def __repr__(self):
         return f"Coordinate(x={self.x}, y={self.y})"
 
+    def __eq__(self, other):
+        if self.x == other.x and self.y == other.y:
+            return True
+        else:
+            return False
 
 @dataclass(frozen=False)
 class Message:
@@ -73,7 +89,7 @@ class AppendEntriesRequest(Message):
             dict["entries"] = [LogEntry(**entry) for entry in dict["entries"]]
             return cls(**dict)
         except KeyError as e:
-            raise e
+            raise TypeError(str(e))
 
     def __repr__(self):
         return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.commitIndex=}, {self.prevLogIndex=}, {self.prevLogTerm=}, {self.entries=})"
@@ -103,6 +119,7 @@ class ResponseVoteMessage(Message):
     def __repr__(self):
         return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.voteGranted=})"
 
+
 @dataclass(frozen=True)
 class Member:
     """ Member class used to initialize discover
@@ -122,6 +139,10 @@ class Member:
         """
         return cls(**dict)
 
+    def __repr__(self):
+        return f"Member({self.id=}, {self.host=}, {self.port=})"
+
+
 @dataclass(frozen=True)
 class RequestDiscover:
     member: Member  # origin of the request
@@ -136,6 +157,10 @@ class RequestDiscover:
         :rtype: coordinate dataclass
         """
         return cls(**dict)
+
+    def __repr__(self):
+        return f"RequestDiscover({self.member=})"
+
 
 @dataclass(frozen=True)
 class ResponseDiscover:
@@ -155,7 +180,7 @@ class ResponseDiscover:
             dict["memberList"] = [Member(**entry) for entry in dict["memberList"]]
             return cls(**dict)
         except KeyError as e:
-            raise e
+            raise TypeError(str(e))
 
 @dataclass(frozen=True)
 class ClientRequestMessage:
@@ -166,3 +191,53 @@ class ClientRequestMessage:
 class ClientResponseMessage:
     """Respons from Leader to Client"""
     blablabla: float
+
+
+@dataclass(frozen=True)
+class NavigationRequest:
+    clientId: int
+    currentPosition: Coordinate
+    destination: Coordinate
+
+    @classmethod
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        try:
+            dict["currentPosition"] = Coordinate(**dict["currentPosition"])
+            dict["destination"] = Coordinate(**dict["destination"])
+            return cls(**dict)
+        except KeyError as e:
+            raise TypeError(str(e))
+
+    def __repr__(self):
+        return f"NavigationRequest({self.clientId=}, {self.currentPosition=}, {self.destination=})"
+
+
+@dataclass(frozen=True)
+class NavigationResponse:
+    clientId: int
+    nextStep: Coordinate
+
+    @classmethod
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        try:
+            dict["nextStep"] = Coordinate(**dict["nextStep"])
+            return cls(**dict)
+        except KeyError as e:
+            raise TypeError(str(e))
+
+    def __repr__(self):
+        return f"NavigationResponse({self.clientId=}, {self.nextStep=})"
