@@ -44,9 +44,9 @@ class Client(threading.Thread):
             if isinstance(message, NavigationResponse):
                 self.onNavigation(message)
             # leader timeout
-            # ready, _, _ = select.select([], [], [], TIMEOUT)
-            # if ready:
-            #     self.leader = None
+            ready, _, _ = select.select([], [], [], TIMEOUT)
+            if ready:
+                self.leader = None
         print(f"Client {self.id}: Reached destination in: {self.getTimeDiff()}")
 
     def onNavigation(self, message: NavigationResponse):
