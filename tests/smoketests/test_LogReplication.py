@@ -37,21 +37,22 @@ class TestLogReplication(SmokeTest):
         client.shutdown()
 
     def test_LogCopy(self):
-        """Start 2 Nodes in the cluster and run the simulation with one client. After some time, start a new node and
+        """Start 3 Nodes in the cluster and simulate the failure of a follower.
+        Run the simulation with one client. After some time, restart the node and
         verify that it copies all logs"""
-        self.createNodes(types=[Leader, Follower])
+        self.createNodes(types=[Leader, Follower, Follower])
 
         sleep(1)  # Wait a short time until cluster has started
 
-        self.nodes[1].shutdown()
-        del self.nodes[1]
+        self.deleteNode(3)
 
-        client = Client(Coordinate(15, 15), [(self.nodes[0].ipAddress, self.nodes[0].unicastPort)], "localhost", 18011, 1000, 1000, 0)
+        client = Client(Coordinate(15, 15), [(self.nodes[0].ipAddress, self.nodes[0].unicastPort)], "localhost", 18011,
+                        1000, 1000, 0)
         client.start()
 
-        sleep(5)  # Let simulation run for a while.
+        sleep(5)
 
-        self.createSingleNode(2, Follower)
+        self.startNode(3, Follower)
 
         sleep(10)
 

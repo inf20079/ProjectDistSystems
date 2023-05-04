@@ -48,11 +48,14 @@ class Leader(State):
 
         if not message.success:  # AppendEntries did not succeed
             if self.node.lastLogIndex() > -1:  # We can actually send a past log (maybe we just shouldn't be the Leader)
-                self.nextIndex[message.senderID] = max(0, self.nextIndex[message.senderID] - 1)
 
-                previousIndex = self.nextIndex[message.senderID]
-                previous = self.node.log[previousIndex]
+                self.nextIndex[message.senderID] -= 1
+
+                previousIndex = max(-1, self.nextIndex[message.senderID] - 1)
+                previousTerm = self.node.log[previousIndex].term if previousIndex > -1 else 0
                 current = self.node.log[self.nextIndex[message.senderID]]
+
+                print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Sending previous log with index {previousIndex}")
 
                 appendEntry = AppendEntriesRequest(
                     senderID=self.node.id,
@@ -60,14 +63,13 @@ class Leader(State):
                     term=self.node.currentTerm,
                     commitIndex=self.node.commitIndex,
                     prevLogIndex=previousIndex,
-                    prevLogTerm=previous.term,
+                    prevLogTerm=previousTerm,
                     entries=[current]
                 )
                 return self.__class__, appendEntry
 
         self.matchIndex[message.senderID] = self.prevLogIndex
         self.nextIndex[message.senderID] = self.node.lastLogIndex() + 1
-        print(message.senderID)
 
         #if self.nextIndex[message.senderID] > self.prevLogIndex:
         #    self.nextIndex[message.senderID] = self.prevLogIndex

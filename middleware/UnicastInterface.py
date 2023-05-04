@@ -28,6 +28,7 @@ class UnicastInterface(AbstractSocketInterface):
         self.clientThreads = []
 
     def configureSocket(self) -> socket.socket:
+        print("UnicastInterface: configureSocket")
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((self.ip, self.port))
         sock.listen(5)
@@ -100,6 +101,7 @@ class UnicastInterface(AbstractSocketInterface):
             self.onReadable()
 
     def __del__(self):
+        print("UnicastInterface: __del__")
 
         # close socket
         self.socket.close()

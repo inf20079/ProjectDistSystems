@@ -47,7 +47,7 @@ class TestLeaderElection(SmokeTest):
             onFailedText=f"No node became Leader after {maxDuration} seconds."
         )
 
-        self.createSingleNode(nodeID=3, type=Leader)
+        self.startNode(nodeID=3, type=Leader)
 
         maxDuration = 30
         self.checkForDuration(

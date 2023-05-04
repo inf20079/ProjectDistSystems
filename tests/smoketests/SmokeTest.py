@@ -38,20 +38,25 @@ class SmokeTest(unittest.TestCase):
 
         for i in range(nodeCount):
             nodeID = i + 1
-            self.createSingleNode(nodeID, types[i])
+            self.startNode(nodeID, types[i])
 
         self.nodesLoopRunning = True
         threading.Thread(
             target=self.nodesLoop
         ).start()
 
-    def createSingleNode(self, nodeID, type):
+    def startNode(self, nodeID, type):
         ip = self.config.get(str(nodeID), "ip")
         port = self.config.get(str(nodeID), "port")
         peers = [member for member in self.members if member.id != nodeID]
         node = Node(stateClass=type, id=nodeID, ipAddress=str(ip), unicastPort=int(port),
                     broadcastPort=int(self.broadcastPort), peers=peers)
         self.nodes.append(node)
+
+    def deleteNode(self, nodeID):
+        node = [node for node in self.nodes if node.id == nodeID][0]
+        node.shutdown()
+        del node
 
     def nodesLoop(self):
         while self.nodesLoopRunning:

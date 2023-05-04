@@ -52,11 +52,11 @@ class Node:
         print(f"Node {id} started with state {self.state}")
 
     def pollMessages(self):
-        if self.unicastInterface is None or self.broadcastInterface is None:
+        try:
+            self.unicastInterface.refresh()
+            self.broadcastInterface.refresh()
+        except AttributeError:
             return
-
-        self.unicastInterface.refresh()
-        self.broadcastInterface.refresh()
 
         def handleQueue(interface):
             message = interface.popMessage()
@@ -152,31 +152,37 @@ class Node:
         return newCoordinate
 
     def saveTrafficArea(self):
-        filePath = f"./temp/TrafficAreaNode{self.id}.pkl"
+        filePath = os.getcwd() + os.sep + "temp/TrafficAreaNode{self.id}.pkl"
         os.makedirs(os.path.dirname(filePath), exist_ok=True)
         with open(filePath, 'wb') as f:
             # pickle the object to the file
             pickle.dump(self.trafficControlLogic.trafficArea, f)
 
     def saveLog(self):
-        filePath = f"./temp/LogNode{self.id}.pkl"
+        filePath = os.getcwd() + os.sep + "temp/LogNode{self.id}.pkl"
         os.makedirs(os.path.dirname(filePath), exist_ok=True)
         with open(filePath, 'wb') as f:
             # pickle the object to the file
             pickle.dump(self.log, f)
 
     def loadTrafficArea(self):
-        filePath = f"./temp/TrafficAreaNode{self.id}.pkl"
+        filePath = os.getcwd() + os.sep + "temp/TrafficAreaNode{self.id}.pkl"
         # check if the file exists
         if os.path.exists(filePath):
             with open(filePath, 'rb') as f:
-                # unpickle the object from the file
-                self.trafficControlLogic.trafficArea = pickle.load(f)
+                # Read the pickled data in chunks
+                data = bytearray()
+                while True:
+                    chunk = f.read(4096)
+                    if not chunk:
+                        break
+                    data += chunk
+                self.trafficControlLogic.trafficArea = pickle.loads(data)
         else:
             print(f"[{self.id}] no traffic area file found")
 
     def loadLog(self):
-        filePath = f"./temp/LogNode{self.id}.pkl"
+        filePath = os.getcwd() + os.sep + "temp/LogNode{self.id}.pkl"
         # check if the file exists
         if os.path.exists(filePath):
             with open(filePath, 'rb') as f:
@@ -187,6 +193,9 @@ class Node:
 
     def shutdown(self):
         self.state.shutdown()
-        del self.unicastInterface
-        del self.broadcastInterface
         self.isPeriodicDiscoveryActive = False
+        try:
+            del self.unicastInterface
+            del self.broadcastInterface
+        except AttributeError:
+            return

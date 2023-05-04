@@ -89,9 +89,6 @@ class State:
             i += 1
             j += 1
 
-        if message.entries:
-            print(message.entries)
-
         # Append any new entries not already in the log
         self.node.appendEntriesToLog(message.entries[j:])
 
