@@ -76,6 +76,7 @@ class State:
                 # The previous log entry doesn't match, so send a
                 # failure response indicating the mismatch
                 print(f"[{self.node.id}](State) onAppendEntries: The previous log entry doesn't match")
+                print(f"[{self.node.id}](State) onAppendEntries: my log is {self.node.log}")
                 return self.__class__, self.generateAppendEntriesResponse(message, False)
 
         # If an existing entry conflicts with a new one (same index but different terms),

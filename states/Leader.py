@@ -43,19 +43,23 @@ class Leader(State):
 
         if message.senderID not in self.nextIndex.keys():
             self.nextIndex[message.senderID] = self.node.lastLogIndex() + 1
+            print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Setting nextIndex={self.nextIndex[message.senderID]} for {message.senderID=}")
         if message.senderID not in self.matchIndex.keys():
             self.matchIndex[message.senderID] = 0
 
-        if not message.success:  # AppendEntries did not succeed
+        # If leader and follower logs don't match, AppendEntries check fails. Leader decrements nextIndex,
+        # retries. Once successful, follower log is consistent.
+        if not message.success:
             if self.node.lastLogIndex() > -1:  # We can actually send a past log (maybe we just shouldn't be the Leader)
 
-                self.nextIndex[message.senderID] -= 1
+                self.nextIndex[message.senderID] = max(0, self.nextIndex[message.senderID] - 1)
 
                 previousIndex = max(-1, self.nextIndex[message.senderID] - 1)
                 previousTerm = self.node.log[previousIndex].term if previousIndex > -1 else 0
-                current = self.node.log[self.nextIndex[message.senderID]]
 
-                print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Sending previous log with index {previousIndex}")
+                logsToSend = self.node.log[self.nextIndex[message.senderID]:]
+
+                print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Sending previous log with {previousIndex=} and {self.nextIndex[message.senderID]=}: {logsToSend}")
 
                 appendEntry = AppendEntriesRequest(
                     senderID=self.node.id,
@@ -64,7 +68,7 @@ class Leader(State):
                     commitIndex=self.node.commitIndex,
                     prevLogIndex=previousIndex,
                     prevLogTerm=previousTerm,
-                    entries=[current]
+                    entries=logsToSend
                 )
                 return self.__class__, appendEntry
 

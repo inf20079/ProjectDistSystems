@@ -152,21 +152,21 @@ class Node:
         return newCoordinate
 
     def saveTrafficArea(self):
-        filePath = os.getcwd() + os.sep + "temp/TrafficAreaNode{self.id}.pkl"
+        filePath = os.getcwd() + os.sep + f"temp/TrafficAreaNode{self.id}.pkl"
         os.makedirs(os.path.dirname(filePath), exist_ok=True)
         with open(filePath, 'wb') as f:
             # pickle the object to the file
             pickle.dump(self.trafficControlLogic.trafficArea, f)
 
     def saveLog(self):
-        filePath = os.getcwd() + os.sep + "temp/LogNode{self.id}.pkl"
+        filePath = os.getcwd() + os.sep + f"temp/LogNode{self.id}.pkl"
         os.makedirs(os.path.dirname(filePath), exist_ok=True)
         with open(filePath, 'wb') as f:
             # pickle the object to the file
             pickle.dump(self.log, f)
 
     def loadTrafficArea(self):
-        filePath = os.getcwd() + os.sep + "temp/TrafficAreaNode{self.id}.pkl"
+        filePath = os.getcwd() + os.sep + f"temp/TrafficAreaNode{self.id}.pkl"
         # check if the file exists
         if os.path.exists(filePath):
             with open(filePath, 'rb') as f:
@@ -182,7 +182,7 @@ class Node:
             print(f"[{self.id}] no traffic area file found")
 
     def loadLog(self):
-        filePath = os.getcwd() + os.sep + "temp/LogNode{self.id}.pkl"
+        filePath = os.getcwd() + os.sep + f"temp/LogNode{self.id}.pkl"
         # check if the file exists
         if os.path.exists(filePath):
             with open(filePath, 'rb') as f:

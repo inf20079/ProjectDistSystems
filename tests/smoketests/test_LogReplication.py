@@ -15,11 +15,8 @@ class TestLogReplication(SmokeTest):
         self.createNodes(types=[Leader, Follower, Follower])
 
         sleep(1)  # Wait a short time until cluster has started
-
-        client = Client(Coordinate(15, 15), [(self.nodes[1].ipAddress, self.nodes[1].unicastPort)], "localhost", 18011, 1000, 1000, 0)
-        client.start()
-
-        sleep(20)  # Let client send a few messages
+        self.createAndStartClient(1)
+        sleep(5)  # Let client send a few messages
 
         maxDuration = 20
         self.checkForDuration(
@@ -30,31 +27,53 @@ class TestLogReplication(SmokeTest):
 
         maxDuration = 20
         self.checkForDuration(
-            passCondition=lambda: len(self.nodes[1].log) == len(self.nodes[2].log) == len(self.nodes[0].log),
+            passCondition=lambda: self.checkIfLogsAreEqual(1, 2) and self.checkIfLogsAreEqual(1, 3),
             maxDuration=maxDuration,
             onFailedText=f"Followers did not replicate the log after {maxDuration} seconds."
         )
-        client.shutdown()
 
-    def test_LogCopy(self):
+    def test_Restart_ReplicateLog(self):
         """Start 3 Nodes in the cluster and simulate the failure of a follower.
         Run the simulation with one client. After some time, restart the node and
-        verify that it copies all logs"""
+        verify that it copies and applies all logs"""
+
         self.createNodes(types=[Leader, Follower, Follower])
 
         sleep(1)  # Wait a short time until cluster has started
-
         self.deleteNode(3)
-
-        client = Client(Coordinate(15, 15), [(self.nodes[0].ipAddress, self.nodes[0].unicastPort)], "localhost", 18011,
-                        1000, 1000, 0)
-        client.start()
-
+        sleep(1)
+        self.createAndStartClient(1)
         sleep(5)
-
         self.startNode(3, Follower)
 
-        sleep(10)
+        maxDuration = 20
+        self.checkForDuration(
+            passCondition=lambda: self.checkIfLogsAreEqual(1, 3),
+            maxDuration=maxDuration,
+            onFailedText=f"Follower did not replicate the log after {maxDuration} seconds."
+        )
 
+    def test_Restart_ReplicateFromFileAndLog(self):
+        """Start 3 Nodes in the cluster and run the simulation with one client.
+        After some time, simulate the failure of a follower.
+        After some time, restart the node and verify that it (i) restores
+        all logs and the TrafficAreaNode{nodeID} file and (ii) retrieves all logs
+        it has not seen yet from the Leader and applies them to its state machine"""
+
+        self.createNodes(types=[Leader, Follower, Follower])
+
+        sleep(1)
+        self.createAndStartClient(1)
+        sleep(5)
+        self.deleteNode(3)
+        sleep(5)
+        self.startNode(3, Follower)
+
+        maxDuration = 20
+        self.checkForDuration(
+            passCondition=lambda: self.checkIfLogsAreEqual(1, 3),
+            maxDuration=maxDuration,
+            onFailedText=f"Follower did not replicate the log after {maxDuration} seconds."
+        )
 
 

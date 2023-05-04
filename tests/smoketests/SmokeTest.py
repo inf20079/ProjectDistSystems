@@ -5,7 +5,8 @@ import unittest
 from time import sleep
 from typing import List
 
-from middleware.types.MessageTypes import Member
+from client.Client import Client
+from middleware.types.MessageTypes import Member, Coordinate
 from node.Node import Node
 from node.RecurringProcedure import RecurringProcedure
 from states.Follower import Follower
@@ -54,8 +55,9 @@ class SmokeTest(unittest.TestCase):
         self.nodes.append(node)
 
     def deleteNode(self, nodeID):
-        node = [node for node in self.nodes if node.id == nodeID][0]
+        node = self.getNodeByID(nodeID)
         node.shutdown()
+        self.nodes.remove(node)
         del node
 
     def nodesLoop(self):
@@ -63,15 +65,44 @@ class SmokeTest(unittest.TestCase):
             for node in self.nodes:
                 node.pollMessages()
 
+    def getNodeByID(self, nodeID):
+        return [node for node in self.nodes if node.id == nodeID][0]
+
+    def createAndStartClient(self, clientCount):
+        self.clients = []
+        for i in range(0, clientCount):
+            client = Client(Coordinate(15, 15), [(self.nodes[1].ipAddress, self.nodes[1].unicastPort)], "localhost", 18011,
+                            1000, 1000, 0)
+            client.start()
+            self.clients.append(client)
+
     def tearDown(self):
         self.nodesLoopRunning = False
         for node in self.nodes:
             node.shutdown()
 
+        if hasattr(self, "clients"):
+            for client in self.clients:
+                client.shutdown()
+
     def checkForDuration(self, passCondition, maxDuration, onFailedText):
         currDuration = 0
         while not passCondition():
-            sleep(1)
+            sleep(0.5)
             currDuration += 1
             if currDuration >= maxDuration:
                 self.fail(onFailedText)
+
+    def checkIfLogsAreEqual(self, nodeID_A, nodeID_B):
+        """Log Matching Property of Raft"""
+        node_A = self.getNodeByID(nodeID_A)
+        node_B = self.getNodeByID(nodeID_B)
+
+        if len(node_A.log) != len(node_B.log):
+            return False
+
+        if node_A.log[-1].term != node_B.log[-1].term:
+            return False
+
+        return True
+
