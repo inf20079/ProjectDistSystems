@@ -29,6 +29,29 @@ class Coordinate:
             return False
 
 
+@dataclass(frozen=True)
+class Member:
+    """ Member class used to initialize discover
+    """
+    id: int
+    host: str
+    port: int
+
+    @classmethod
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        return cls(**dict)
+
+    def __repr__(self):
+        return f"Member({self.id=}, {self.host=}, {self.port=})"
+
+
 @dataclass()
 class NavigationRequest:
     clientId: int
@@ -73,8 +96,8 @@ class NavigationResponse:
         :rtype: coordinate dataclass
         """
         try:
-            dict["nextStep"] = Coordinate(**dict["nextStep"])
-            dict["leader"] = Member(**dict["leader"])
+            dict["nextStep"] = Coordinate(**dict["nextStep"]) if dict["nextStep"] is not None else None
+            dict["leader"] = Member(**dict["leader"]) if dict["leader"] is not None else None
             return cls(**dict)
         except KeyError as e:
             raise TypeError(str(e))
@@ -174,29 +197,6 @@ class ResponseVoteMessage(Message):
 
     def __repr__(self):
         return f"Message({self.senderID=}, {self.receiverID=}, {self.term=}, {self.voteGranted=})"
-
-
-@dataclass(frozen=True)
-class Member:
-    """ Member class used to initialize discover
-    """
-    id: int
-    host: str
-    port: int
-
-    @classmethod
-    def fromDict(cls, dict):
-        """ object creation from dict
-
-        :param dict: coordinate dataclass as dict
-        :type dict:
-        :return:
-        :rtype: coordinate dataclass
-        """
-        return cls(**dict)
-
-    def __repr__(self):
-        return f"Member({self.id=}, {self.host=}, {self.port=})"
 
 
 @dataclass(frozen=True)

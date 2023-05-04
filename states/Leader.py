@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from middleware.types.JsonCoding import EnhancedJSONEncoder
 from middleware.types.MessageTypes import AppendEntriesRequest, AppendEntriesResponse, RequestVoteMessage, LogEntry, \
-    NavigationRequest, NavigationResponse
+    NavigationRequest, NavigationResponse, Member
 from node.RecurringProcedure import RecurringProcedure
 from states.State import State
 
@@ -84,13 +84,22 @@ class Leader(State):
                 canCommit = True
                 break
 
-        if canCommit:  # If the majority of nodes consented the
-            # AppendEntries-RPC, apply changes to state machine, send response and commit.
+        if canCommit:  # AppendEntries-RPC, apply changes to state machine, send response and commit.
             print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Can commit")
+            print(self.prevLogIndex)
+            print(self.node.lastLogIndex() + 1)
             for i in range(self.prevLogIndex, self.node.lastLogIndex() + 1):
                 navigationRequest, nextStep = self.applyLogAtIndexToStateMachine(i)
+                if navigationRequest is None or nextStep is None:
+                    continue
+
                 navigationResponse = NavigationResponse(
                     clientId=navigationRequest.clientId,
+                    leader=Member(
+                        host=self.node.ipAddress,
+                        port=self.node.unicastPort,
+                        id=None
+                    ),
                     nextStep=nextStep
                 )
                 self.node.sendMessageUnicast(navigationResponse, host=navigationRequest.clientHost,
