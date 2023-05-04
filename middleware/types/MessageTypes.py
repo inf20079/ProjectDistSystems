@@ -29,7 +29,7 @@ class Coordinate:
             return False
 
 
-@dataclass(frozen=True)
+@dataclass()
 class NavigationRequest:
     clientId: int
     clientHost: str
@@ -57,10 +57,11 @@ class NavigationRequest:
         return f"NavigationRequest({self.clientId=}, {self.clientHost=}, {self.clientPort=}, {self.currentPosition=}, {self.destination=})"
 
 
-@dataclass(frozen=True)
+@dataclass()
 class NavigationResponse:
     clientId: int
-    nextStep: Coordinate
+    nextStep: Coordinate = None
+    leader: Member = None
 
     @classmethod
     def fromDict(cls, dict):
@@ -73,13 +74,14 @@ class NavigationResponse:
         """
         try:
             dict["nextStep"] = Coordinate(**dict["nextStep"])
+            dict["leader"] = Member(**dict["leader"])
             return cls(**dict)
         except KeyError as e:
             raise TypeError(str(e))
 
     def __repr__(self):
         return f"NavigationResponse({self.clientId=}, {self.nextStep=})"
-
+    
 
 @dataclass(frozen=True)
 class LogEntry:
@@ -235,3 +237,4 @@ class ResponseDiscover:
             return cls(**dict)
         except KeyError as e:
             raise TypeError(str(e))
+        
