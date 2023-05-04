@@ -20,6 +20,7 @@ class TestSystemFailure(SmokeTest):
         sleep(10)  # Let the simulation run
 
         trafficAreasBefore = [node.trafficControlLogic.trafficArea.getArea() for node in self.nodes]
+        logsBefore = [node.log for node in self.nodes]
 
         self.deleteNode(1)
         self.deleteNode(2)
@@ -32,10 +33,9 @@ class TestSystemFailure(SmokeTest):
         self.startNode(3, Follower)
 
         trafficAreasAfter = [node.trafficControlLogic.trafficArea.getArea() for node in self.nodes]
+        logsAfter = [node.log for node in self.nodes]
 
-        for i in range(0, len(trafficAreasAfter)):
+        for i in range(0, len(self.nodes)):
             self.assertEqual(trafficAreasBefore[i], trafficAreasAfter[i])
-
-
-
+            self.checkIfLogsAreEqual_Logs(logsBefore[i], logsAfter[i])
 
