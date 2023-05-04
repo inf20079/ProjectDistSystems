@@ -73,6 +73,7 @@ class Client(threading.Thread):
     def requestNavigation(self, host: str = None, port: int = None ):
         print(f"[C](Client) Request Navigation")
         if host and port:
+            print(host, port)
             serverAdress = (host, port)
         else:
             serverAdress = random.choice(self.serverList)

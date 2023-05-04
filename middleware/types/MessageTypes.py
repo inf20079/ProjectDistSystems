@@ -103,7 +103,7 @@ class NavigationResponse:
             raise TypeError(str(e))
 
     def __repr__(self):
-        return f"NavigationResponse({self.clientId=}, {self.nextStep=})"
+        return f"NavigationResponse({self.clientId=}, {self.nextStep=}, {self.leader=})"
     
 
 @dataclass(frozen=True)

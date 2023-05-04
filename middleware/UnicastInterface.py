@@ -89,7 +89,7 @@ class UnicastInterface(AbstractSocketInterface):
         client_socket.close()
 
     def refresh(self):
-        readable, writable, _ = select.select([self.socket], self.clientSockets, [], 0.1)
+        readable, writable, _ = select.select([self.socket], self.clientSockets, [], 0.0001)
         # send messages
         for sock in writable:
             self.onWritable(sock)

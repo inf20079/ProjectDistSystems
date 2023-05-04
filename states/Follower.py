@@ -9,11 +9,12 @@ class Follower(Voter):
         self.leader = None
 
     def onAppendEntries(self, message: AppendEntriesRequest):
-        self.leader = Member(-1, self.node.getIpByID(message.senderID), self.node.unicastPort)
+        self.leader = self.node.getIpByID(message.senderID)
         self.recurringProcedure.resetTimeout()
         return super().onAppendEntries(message)
 
     def onClientRequestReceived(self, message: NavigationRequest):
+        print(f"[{self.node.id}](Follower) onClientRequestReceived")
         if self.leader is not None:
             response = NavigationResponse(message.clientId, None, self.leader)
             self.node.sendMessageUnicast(response, message.clientHost, message.clientPort)
