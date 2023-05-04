@@ -6,10 +6,13 @@ import random
 from time import sleep
 from typing import Tuple, List
 
+import select
+
 from client.Map import Map
 from middleware.UnicastInterface import UnicastInterface, Unicast
 from middleware.types.MessageTypes import Coordinate, NavigationResponse, NavigationRequest
 
+TIMEOUT = 1
 
 class Client(threading.Thread):
 
@@ -40,6 +43,10 @@ class Client(threading.Thread):
             message = self.unicastInterface.popMessage()
             if isinstance(message, NavigationResponse):
                 self.onNavigation(message)
+            # leader timeout
+            # ready, _, _ = select.select([], [], [], TIMEOUT)
+            # if ready:
+            #     self.leader = None
         print(f"Client {self.id}: Reached destination in: {self.getTimeDiff()}")
 
     def onNavigation(self, message: NavigationResponse):
@@ -80,7 +87,7 @@ class Client(threading.Thread):
         self.unicastInterface.appendMessage(unicast)
 
     def visualize(self):
-        print(f"Client {self.id}: Time Taken {self.getTimeDiff()}")
+        print(f"Client {self.id}: Time Taken {self.getTimeDiff()}, Current Position {self.currentPosition}, Leader {self.leader}")
         # self.map.print_board() # Board is too big for the terminal
 
     def setStartTime(self):

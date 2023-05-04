@@ -18,9 +18,10 @@ class SmokeTest(unittest.TestCase):
         RecurringProcedure.TIMEOUT_SCALE = 20
 
         dir = os.getcwd() + os.sep + "temp"
-        filelist = [f for f in os.listdir(dir) if f.endswith(".pkl")]
-        for f in filelist:
-            os.remove(os.path.join(dir, f))
+        if os.path.exists(dir):
+            filelist = [f for f in os.listdir(dir) if f.endswith(".pkl")]
+            for f in filelist:
+                os.remove(os.path.join(dir, f))
 
     def createNodes(self, types):
         nodeCount = len(types)
