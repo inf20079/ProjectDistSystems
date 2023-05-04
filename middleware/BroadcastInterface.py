@@ -1,7 +1,6 @@
 import json
 import socket
 from time import sleep
-
 import select
 
 from middleware.AbstractSocketInterface import AbstractSocketInterface
@@ -36,7 +35,7 @@ class BroadcastInterface(AbstractSocketInterface):
             self.socket.sendto(message_json_string.encode(), ("<broadcast>", self.port))
 
     def refresh(self):
-        readable, writable, _ = select.select([self.socket], [self.socket], [], 0.1)
+        readable, writable, _ = select.select([self.socket], [self.socket], [], 0.0001)
         # send messages
         if writable:
             self.onWritable()

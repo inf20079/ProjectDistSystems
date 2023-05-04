@@ -34,7 +34,7 @@ class Candidate(Voter):
         if message.voteGranted:
             self.votesReceived += 1
             print(f"[{self.node.id}](Candidate) onVoteResponseReceived: vote granted")
-            if self.votesReceived > len(self.node.peers) // 2:
+            if self.votesReceived >= len(self.node.peers) // 2:
                 print(f"[{self.node.id}](Candidate) onVoteResponseReceived: majority votes")
                 return Leader, None
             return self.__class__, None
@@ -47,6 +47,7 @@ class Candidate(Voter):
         self.startElection()
 
     def onClientRequestReceived(self, message: NavigationRequest):
+        print(f"[{self.node.id}](Candidate) onClientRequestReceived")
         response = NavigationResponse(message.clientId, None, None)
         self.node.sendMessageUnicast(response, message.clientHost, message.clientPort)
 
