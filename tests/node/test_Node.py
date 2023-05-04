@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+from middleware.UnicastInterface import Unicast
+from middleware.types.MessageTypes import Message
 from node.Node import Node
 
 
@@ -13,21 +15,15 @@ class TestNode(unittest.TestCase):
 
     def test_send_message_broadcast(self):
         message = "Hello, world!"
-        self.node.multicastPub.appendMessage = MagicMock()
-        self.node.sendMessageMulticast(message)
-        self.node.multicastPub.appendMessage.assert_called_once_with(message)
-
-    def test_send_message_multicast(self):
-        message = "Hello, world!"
-        self.node.multicastPub.appendMessage = MagicMock()
-        self.node.sendMessageMulticast(message)
-        self.node.multicastPub.appendMessage.assert_called_once_with(message)
+        self.node.broadcastInterface.appendMessage = MagicMock()
+        self.node.sendMessageBroadcast(message)
+        self.node.broadcastInterface.appendMessage.assert_called_once_with(message)
 
     def test_send_message_unicast(self):
-        message = "Hello, world!"
-        self.node.unicastPub.appendMessage = MagicMock()
+        message = Message(1, 2, 4)
+        self.node.unicastInterface.appendMessage = MagicMock()
         self.node.sendMessageUnicast(message)
-        self.node.unicastPub.appendMessage.assert_called_once_with(message)
+        self.node.unicastInterface.appendMessage.assert_called_once_with(message)
 
     def test_get_ip_by_id(self):
         id_to_find = 1

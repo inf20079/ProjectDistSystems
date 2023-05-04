@@ -31,7 +31,7 @@ class Leader(State):
 
         newEntry = LogEntry(
             term=self.node.currentTerm,
-            action=json.dumps(message, cls=EnhancedJSONEncoder)
+            action=message
         )
         self.newEntries.append(newEntry)
         self.node.log.append(newEntry)

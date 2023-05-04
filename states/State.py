@@ -1,3 +1,4 @@
+import json
 import time
 import random
 from middleware.types.MessageTypes import *
@@ -131,6 +132,7 @@ class State:
         if index == -1:
             return
         try:
+            print("debug", self.node.log[index].action)
             navigationRequest = NavigationRequest.fromDict(self.node.log[index].action)
             nextStep = self.node.applyToStateMachine(navigationRequest)
 

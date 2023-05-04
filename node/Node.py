@@ -1,4 +1,6 @@
 import inspect
+import os
+import pickle
 import threading
 import time
 from socket import gethostname, gethostbyname
@@ -26,6 +28,7 @@ class Node:
         # raft
         self.id = id
         self.log: [LogEntry] = [] if log is None else log
+        self.loadLog()
 
         self.commitIndex = -1  # Nothing committed so far
         self.lastApplied = -1
@@ -44,6 +47,7 @@ class Node:
 
         # logic
         self.trafficControlLogic = TrafficControlLogic(TrafficArea(2, 1000, 1000))
+        self.loadTrafficArea()
 
     def pollMessages(self):
         self.unicastInterface.refresh()
@@ -130,8 +134,44 @@ class Node:
         print(f"[{self.id}](Node) applyToStateMachine")
         if message.currentPosition.x is None or message.currentPosition.y is None:
             self.trafficControlLogic.start(message.clientId)
-        return self.trafficControlLogic.move(message.clientId, message.destination)
+        newCoordinate = self.trafficControlLogic.move(message.clientId, message.destination)
+        self.saveTrafficArea()
+        self.saveLog()
+        return newCoordinate
 
+    def saveTrafficArea(self):
+        filePath = f"./temp/TrafficAreaNode{self.id}.pkl"
+        os.makedirs(os.path.dirname(filePath), exist_ok=True)
+        with open(filePath, 'wb') as f:
+            # pickle the object to the file
+            pickle.dump(self.trafficControlLogic.trafficArea, f)
+
+    def saveLog(self):
+        filePath = f"./temp/LogNode{self.id}.pkl"
+        os.makedirs(os.path.dirname(filePath), exist_ok=True)
+        with open(filePath, 'wb') as f:
+            # pickle the object to the file
+            pickle.dump(self.log, f)
+
+    def loadTrafficArea(self):
+        filePath = f"./temp/TrafficAreaNode{self.id}.pkl"
+        # check if the file exists
+        if os.path.exists(filePath):
+            with open(filePath, 'rb') as f:
+                # unpickle the object from the file
+                self.trafficControlLogic.trafficArea = pickle.load(f)
+        else:
+            print(f"[{self.id}] no traffic area file found")
+
+    def loadLog(self):
+        filePath = f"./temp/LogNode{self.id}.pkl"
+        # check if the file exists
+        if os.path.exists(filePath):
+            with open(filePath, 'rb') as f:
+                # unpickle the object from the file
+                self.log = pickle.load(f)
+        else:
+            print(f"[{self.id}] no log file found")
 
     def shutdown(self):
         self.state.shutdown()

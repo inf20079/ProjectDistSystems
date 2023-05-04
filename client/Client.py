@@ -1,4 +1,5 @@
 import json
+import os
 import threading
 from datetime import datetime
 import random
@@ -38,7 +39,7 @@ class Client(threading.Thread):
             message = self.unicastInterface.popMessage()
             if isinstance(message, NavigationResponse):
                 self.onNavigation(message)
-        print(f"Reached destination in: {self.getTimeDiff()}")
+        print(f"Client {self.id}: Reached destination in: {self.getTimeDiff()}")
 
     def onNavigation(self, message: NavigationResponse):
         print(f"[C](Client) onNavigation")
@@ -62,6 +63,10 @@ class Client(threading.Thread):
         )
         unicast = Unicast(serverAdress[0], serverAdress[1], message)
         self.unicastInterface.appendMessage(unicast)
+
+    def visualize(self):
+        print(f"Client {self.id}: Time Taken {self.getTimeDiff()}")
+        # self.map.print_board() # Board is too big for the terminal
 
     def setStartTime(self):
         self.startTime = datetime.now()

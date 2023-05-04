@@ -16,6 +16,7 @@ class LogEntry:
         :return:
         :rtype: coordinate dataclass
         """
+        dict["action"] = NavigationRequest(**dict["action"])
         return cls(**dict)
 
     def __repr__(self):

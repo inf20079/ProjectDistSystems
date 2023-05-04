@@ -4,7 +4,7 @@ import time
 
 
 class RecurringProcedure:
-    TIMEOUT_SCALE = 1
+    TIMEOUT_SCALE = 10
 
     def __init__(self, timeout, onTimeouted):
         self.active = True

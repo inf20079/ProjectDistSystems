@@ -1,0 +1,79 @@
+
+Traceback (most recent call last):
+  File "G:\DistSystems\ProjectDistSystems\node.py", line 55, in <module>
+    main()
+  File "G:\DistSystems\ProjectDistSystems\node.py", line 47, in main
+    node.pollMessages()
+  File "G:\DistSystems\ProjectDistSystems\node\Node.py", line 71, in pollMessages
+    handleQueue(self.broadcastInterface)
+  File "G:\DistSystems\ProjectDistSystems\node\Node.py", line 67, in handleQueue
+    self.onRaftMessage(message)
+  File "G:\DistSystems\ProjectDistSystems\node\Node.py", line 107, in onRaftMessage
+    stateClass, response = self.state.onRaftMessage(message=message)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\DistSystems\ProjectDistSystems\states\State.py", line 35, in onRaftMessage
+    stateClass, response = self.onAppendEntries(message)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\DistSystems\ProjectDistSystems\states\Follower.py", line 13, in onAppendEntries
+    return super().onAppendEntries(message)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\DistSystems\ProjectDistSystems\states\State.py", line 104, in onAppendEntries
+    self.applyLogAtIndexToStateMachine(i)
+  File "G:\DistSystems\ProjectDistSystems\states\State.py", line 143, in applyLogAtIndexToStateMachine
+    self.node.sendMessageUnicast(navigationResponse, host=navigationRequest.clientHost,
+  File "G:\DistSystems\ProjectDistSystems\node\Node.py", line 89, in sendMessageUnicast
+    print(f"[{self.id}](Node) sendMessageUnicast: {message.receiverID=}")
+                                                   ^^^^^^^^^^^^^^^^^^
+AttributeError: 'NavigationResponse' object has no attribute 'receiverID'
+
+<states.Follower.Follower object at 0x000001FC2536E610>
+[2](Follower) onElectionTimeouted
+[2](Node) manuallySwitchState: from <class 'states.Follower.Follower'> to <class 'states.Candidate.Candidate'>
+[2](Candidate) startElection
+[2](Candidate) startElection: self.node.currentTerm=1
+[2](Node) sendMessageBroadcast
+[2](Node) onRaftMessage from 1 to 2
+[2](Candidate) onVoteResponseReceived: vote granted
+[2](Candidate) onVoteResponseReceived: majority votes
+[2](Node) manuallySwitchState: from <class 'states.Candidate.Candidate'> to <class 'states.Leader.Leader'>
+[2](Leader) sendHeartbeat
+[2](Node) sendMessageBroadcast
+[2](Node) onRaftMessage from 3 to 2
+[2](State) onMessage: instance not a candidate
+[2](Node) onRaftMessage from 1 to 2
+[2](Leader) onAppendEntriesResponseReceived: Message(self.senderID=1, self.receiverID=2, self.term=1, self.success=False)
+Traceback (most recent call last):
+  File "G:\DistSystems\ProjectDistSystems\node.py", line 55, in <module>
+    main()
+  File "G:\DistSystems\ProjectDistSystems\node.py", line 47, in main
+    node.pollMessages()
+  File "G:\DistSystems\ProjectDistSystems\node\Node.py", line 70, in pollMessages
+    handleQueue(self.unicastInterface)
+  File "G:\DistSystems\ProjectDistSystems\node\Node.py", line 67, in handleQueue
+    self.onRaftMessage(message)
+  File "G:\DistSystems\ProjectDistSystems\node\Node.py", line 107, in onRaftMessage
+    stateClass, response = self.state.onRaftMessage(message=message)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\DistSystems\ProjectDistSystems\states\State.py", line 38, in onRaftMessage
+    stateClass, response = self.onAppendEntriesResponseReceived(message)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "G:\DistSystems\ProjectDistSystems\states\Leader.py", line 50, in onAppendEntriesResponseReceived
+    if self.node.prevLogIndex > -1:  # We can actually send a past log (maybe we just shouldn't be the Leader)
+       ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Node' object has no attribute 'prevLogIndex'. Did you mean: 'lastLogIndex'?
+[2](Leader) sendHeartbeat
+[2](Node) sendMessageBroadcast
+[2](Leader) sendHeartbeat
+[2](Node) sendMessageBroadcast
+[2](Leader) sendHeartbeat
+[2](Node) sendMessageBroadcast
+[2](Leader) sendHeartbeat
+[2](Node) sendMessageBroadcast
+[2](Leader) sendHeartbeat
+[2](Node) sendMessageBroadcast
+[2](Leader) sendHeartbeat
+[2](Node) sendMessageBroadcast
+[2](Leader) sendHeartbeat
+[2](Node) sendMessageBroadcast
+[2](Leader) sendHeartbeat
+[2](Node) sendMessageBroadcast
