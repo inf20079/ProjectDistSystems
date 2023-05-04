@@ -22,7 +22,7 @@ class TestLeader(unittest.TestCase):
             success=True
         )
 
-        stateClass, response = self.leader.onResponseReceived(message)
+        stateClass, response = self.leader.onAppendEntriesResponseReceived(message)
 
         self.assertEqual(stateClass, Leader)
         self.assertIsNone(response)
@@ -37,7 +37,7 @@ class TestLeader(unittest.TestCase):
             success=False
         )
 
-        stateClass, response = self.leader.onResponseReceived(message)
+        stateClass, response = self.leader.onAppendEntriesResponseReceived(message)
 
         self.assertEqual(stateClass, Leader)
         self.assertIsNotNone(response)

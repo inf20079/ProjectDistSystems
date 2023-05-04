@@ -9,6 +9,7 @@ from middleware.types.MessageTypes import Member
 from node.Node import Node
 from node.RecurringProcedure import RecurringProcedure
 from states.Follower import Follower
+from states.Leader import Leader
 
 
 class SmokeTest(unittest.TestCase):

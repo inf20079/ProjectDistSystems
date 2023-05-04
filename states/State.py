@@ -34,7 +34,7 @@ class State:
             stateClass, response = self.onAppendEntries(message)
         elif isinstance(message, AppendEntriesResponse):
             if isinstance(self, Leader):
-                stateClass, response = self.onResponseReceived(message)
+                stateClass, response = self.onAppendEntriesResponseReceived(message)
             else:
                 print(f"[{self.node.id}](State) onMessage / AppendEntriesResponse: instance not a leader")
         elif isinstance(message, RequestVoteMessage):
@@ -60,8 +60,7 @@ class State:
     def onAppendEntries(self, message: AppendEntriesRequest):
         print(f"[{self.node.id}](State) onAppendEntries")
 
-        print(f"[{self.node.id}](State) onAppendEntries: {message.term=}")
-        print(f"[{self.node.id}](State) onAppendEntries: {self.node.currentTerm=}")
+        print(f"[{self.node.id}](State) onAppendEntries: {message=}")
 
         # Reply false if message.term < currentTerm
         if message.term < self.node.currentTerm:
@@ -72,8 +71,7 @@ class State:
 
         # Reply false if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
         if message.prevLogIndex >= 0:
-            prevLog = self.node.log[message.prevLogIndex]
-            if prevLog.term != message.prevLogTerm:
+            if len(self.node.log) <= message.prevLogIndex or self.node.log[message.prevLogIndex].term != message.prevLogTerm:
                 # The previous log entry doesn't match, so send a
                 # failure response indicating the mismatch
                 print(f"[{self.node.id}](State) onAppendEntries: The previous log entry doesn't match")
@@ -98,9 +96,12 @@ class State:
         # If leaderCommit > commitIndex, set commitIndex =
         # min(leaderCommit, index of last new entry)
         if message.commitIndex > self.node.commitIndex:
-            self.node.commitIndex = min(
-                message.commitIndex, self.node.lastLogIndex()
-            )
+            self.node.commitIndex = min(message.commitIndex, self.node.lastLogIndex())
+
+        # If commitIndex > lastApplied: increment lastApplied, apply log[lastApplied] to state machine
+        for i in range(self.node.lastApplied, self.node.commitIndex + 1):
+            self.applyLogAtIndexToStateMachine(i)
+        self.node.lastApplied = self.node.commitIndex
 
         # Send a success message
         print(f"[{self.node.id}](State) onAppendEntries: Success")
@@ -125,6 +126,22 @@ class State:
             voteGranted=vote
         )
         return a
+
+    def applyLogAtIndexToStateMachine(self, index: int):
+        if index == -1:
+            return
+        try:
+            navigationRequest = NavigationRequest.fromDict(self.node.log[index].action)
+            nextStep = self.node.applyToStateMachine(navigationRequest)
+
+            navigationResponse = NavigationResponse(
+                clientId=navigationRequest.clientId,
+                nextStep=nextStep
+            )
+            self.node.sendMessageUnicast(navigationResponse, host=navigationRequest.clientHost,
+                                         port=navigationRequest.clientPort)
+        except TypeError as e:
+            print(f"{e=}")
 
     def shutdown(self):
         """To be overriden"""

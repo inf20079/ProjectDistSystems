@@ -41,18 +41,25 @@ class Client(threading.Thread):
         print(f"Reached destination in: {self.getTimeDiff()}")
 
     def onNavigation(self, message: NavigationResponse):
+        print(f"[C](Client) onNavigation")
         self.currentPosition = message.nextStep
         if self.currentPosition == self.destination:
             self.destinationReached = True
         else:
             self.map.move((message.nextStep.x, message.nextStep.y))
             self.requestNavigation()
-        print(f"At time {self.getTimeDiff()} at position {self.currentPosition}.")
+        print(f"[C](Client) At time {self.getTimeDiff()} at position {self.currentPosition}.")
 
     def requestNavigation(self):
-        print(f"[C] Request Navigation")
+        print(f"[C](Client) Request Navigation")
         serverAdress = random.choice(self.serverList)
-        message = NavigationRequest(self.id, self.currentPosition, self.destination)
+        message = NavigationRequest(
+            clientId=self.id,
+            clientHost=self.ip,
+            clientPort=self.port,
+            currentPosition=self.currentPosition,
+            destination=self.destination
+        )
         unicast = Unicast(serverAdress[0], serverAdress[1], message)
         self.unicastInterface.appendMessage(unicast)
 

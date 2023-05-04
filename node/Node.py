@@ -9,7 +9,7 @@ from control.TrafficControlLogic import TrafficControlLogic
 from middleware.BroadcastInterface import BroadcastInterface
 from middleware.UnicastInterface import UnicastInterface, Unicast
 from middleware.types.MessageTypes import RequestDiscover, ResponseDiscover, Member, LogEntry, Message, \
-    NavigationRequest
+    NavigationRequest, Coordinate
 
 
 class Node:
@@ -27,7 +27,8 @@ class Node:
         self.id = id
         self.log: [LogEntry] = [] if log is None else log
 
-        self.commitIndex = 0
+        self.commitIndex = -1  # Nothing committed so far
+        self.lastApplied = -1
         self.currentTerm = 0
 
         self.peers = peers if peers is not None else {}
@@ -80,10 +81,13 @@ class Node:
         print(f"[{self.id}](Node) sendMessageBroadcast")
         self.broadcastInterface.appendMessage(message)
 
-    def sendMessageUnicast(self, message: Any):
+    def sendMessageUnicast(self, message: Any, host: str = None, port: int = None):
         print(f"[{self.id}](Node) sendMessageUnicast: {message.receiverID=}")
-        receiver = self.getIpByID(message.receiverID)
-        unicast = Unicast(receiver.host, receiver.port, message)
+        if host is None or port is None:
+            receiver = self.getIpByID(message.receiverID)
+            host = receiver.host
+            port = receiver.port
+        unicast = Unicast(host, port, message)
         self.unicastInterface.appendMessage(unicast)
 
     def manuallySwitchState(self, stateClass):
@@ -121,6 +125,13 @@ class Node:
                                    memberList=self.peers)
         unicast = Unicast(message.member.host, message.member.port)
         self.sendMessageUnicast(unicast)
+
+    def applyToStateMachine(self, message: NavigationRequest):
+        print(f"[{self.id}](Node) applyToStateMachine")
+        if message.currentPosition.x is None or message.currentPosition.y is None:
+            self.trafficControlLogic.start(message.clientId)
+        return self.trafficControlLogic.move(message.clientId, message.destination)
+
 
     def shutdown(self):
         self.state.shutdown()

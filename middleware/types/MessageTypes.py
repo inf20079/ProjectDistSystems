@@ -186,6 +186,8 @@ class ResponseDiscover:
 @dataclass(frozen=True)
 class NavigationRequest:
     clientId: int
+    clientHost: str
+    clientPort: int
     currentPosition: Coordinate
     destination: Coordinate
 
@@ -206,7 +208,7 @@ class NavigationRequest:
             raise TypeError(str(e))
 
     def __repr__(self):
-        return f"NavigationRequest({self.clientId=}, {self.currentPosition=}, {self.destination=})"
+        return f"NavigationRequest({self.clientId=}, {self.clientHost=}, {self.clientPort=}, {self.currentPosition=}, {self.destination=})"
 
 
 @dataclass(frozen=True)
