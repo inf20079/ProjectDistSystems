@@ -132,8 +132,7 @@ class State:
         if index == -1:
             return
         try:
-            print("debug", self.node.log[index].action)
-            navigationRequest = NavigationRequest.fromDict(self.node.log[index].action)
+            navigationRequest = self.node.log[index].action
             nextStep = self.node.applyToStateMachine(navigationRequest)
 
             navigationResponse = NavigationResponse(
@@ -143,7 +142,7 @@ class State:
             self.node.sendMessageUnicast(navigationResponse, host=navigationRequest.clientHost,
                                          port=navigationRequest.clientPort)
         except TypeError as e:
-            print(f"{e=}")
+            print(f"{e}")
 
     def shutdown(self):
         """To be overriden"""

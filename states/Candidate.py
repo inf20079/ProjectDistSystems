@@ -1,4 +1,5 @@
-from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage, AppendEntriesRequest
+from middleware.types.MessageTypes import ResponseVoteMessage, RequestVoteMessage, AppendEntriesRequest, \
+    NavigationResponse, NavigationRequest
 from states.Follower import Follower
 from states.Leader import Leader
 from states.Voter import Voter
@@ -44,6 +45,10 @@ class Candidate(Voter):
     def onElectionTimeouted(self):
         print(f"[{self.node.id}](Candidate) onElectionTimeouted")
         self.startElection()
+
+    def onClientRequestReceived(self, message: NavigationRequest):
+        response = NavigationResponse(message.clientId, None, None)
+        self.node.sendMessageUnicast(response, message.clientHost, message.clientPort)
 
     def startElection(self):
         """When a Candidate starts an election, it increments the current term, votes for itself,

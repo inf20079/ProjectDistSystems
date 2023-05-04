@@ -47,7 +47,7 @@ class Leader(State):
             self.matchIndex[message.senderID] = 0
 
         if not message.success:  # AppendEntries did not succeed
-            if self.node.prevLogIndex > -1:  # We can actually send a past log (maybe we just shouldn't be the Leader)
+            if self.node.lastLogIndex() > -1:  # We can actually send a past log (maybe we just shouldn't be the Leader)
                 self.nextIndex[message.senderID] = max(0, self.nextIndex[message.senderID] - 1)
 
                 previousIndex = self.nextIndex[message.senderID]

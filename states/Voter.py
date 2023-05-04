@@ -40,9 +40,6 @@ class Voter(State):
 
         return self.__class__, self.generateVoteResponseMessage(message, True)
 
-    def onClientRequestReceived(self, message: NavigationRequest):
-        print(f"hallo freunde")
-
     def onElectionTimeouted(self):
         """Must be implemented in children"""
 

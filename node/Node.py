@@ -86,8 +86,8 @@ class Node:
         self.broadcastInterface.appendMessage(message)
 
     def sendMessageUnicast(self, message: Any, host: str = None, port: int = None):
-        print(f"[{self.id}](Node) sendMessageUnicast: {message.receiverID=}")
         if host is None or port is None:
+            print(f"[{self.id}](Node) sendMessageUnicast: {message.receiverID=}")
             receiver = self.getIpByID(message.receiverID)
             host = receiver.host
             port = receiver.port
