@@ -23,6 +23,7 @@ class Client(threading.Thread):
         self.destinationReached = False
         self.currentPosition = Coordinate(None, None)
         self.stopEvent = threading.Event()
+        self.leader = None
         # Map
         self.map = Map((destination.x, destination.y), sizeX, sizeY)
         # communication
@@ -47,6 +48,8 @@ class Client(threading.Thread):
             self.requestNavigation()
         if message.nextStep is None and message.leader:
             self.requestNavigation(message.leader.host, message.leader.port)
+            self.leader = (message.leader.host, message.leader.port)
+        self.leader = (message.leader.host, message.leader.port)
         self.currentPosition = message.nextStep
         if self.currentPosition == self.destination:
             self.destinationReached = True
