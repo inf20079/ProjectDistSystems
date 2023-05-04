@@ -101,10 +101,13 @@ class SmokeTest(unittest.TestCase):
         node_A = self.getNodeByID(nodeID_A)
         node_B = self.getNodeByID(nodeID_B)
 
-        if len(node_A.log) != len(node_B.log):
+        return self.checkIfLogsAreEqual_Logs(node_A.log, node_B.log)
+
+    def checkIfLogsAreEqual_Logs(self, log_A, log_B):
+        if len(log_A) != len(log_B):
             return False
 
-        if node_A.log[-1].term != node_B.log[-1].term:
+        if log_A[-1].term != log_B[-1].term:
             return False
 
         return True

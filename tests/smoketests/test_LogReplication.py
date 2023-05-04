@@ -8,8 +8,8 @@ from tests.smoketests.SmokeTest import SmokeTest
 class TestLogReplication(SmokeTest):
 
     def test_LogReplication(self):
-        """Start 3 nodes in the cluster, run the simulation with one client, verify that the commands are replicated to all
-        followers"""
+        """Start 3 nodes in the cluster, run the simulation with one client, verify that the commands are replicated
+        to all followers"""
         self.createNodes(types=[Leader, Follower, Follower])
 
         sleep(1)  # Wait a short time until cluster has started
@@ -55,7 +55,7 @@ class TestLogReplication(SmokeTest):
         """Start 3 Nodes in the cluster and run the simulation with one client.
         After some time, simulate the failure of a follower.
         After some time, restart the node and verify that it (i) restores
-        all logs and the TrafficAreaNode{nodeID} file and (ii) retrieves all logs
+        all logs and the file and (ii) retrieves all logs
         it has not seen yet from the Leader and applies them to its state machine"""
 
         self.createNodes(types=[Leader, Follower, Follower])
