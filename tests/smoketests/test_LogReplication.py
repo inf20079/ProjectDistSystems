@@ -19,7 +19,7 @@ class TestLogReplication(SmokeTest):
         client = Client(Coordinate(15, 15), [(self.nodes[0].ipAddress, self.nodes[0].unicastPort)], "localhost", 18011, 1000, 1000, 0)
         client.start()
 
-        sleep(50)  # Let client send a few messages
+        sleep(20)  # Let client send a few messages
 
         maxDuration = 20
         self.checkForDuration(
@@ -39,3 +39,21 @@ class TestLogReplication(SmokeTest):
     def test_LogCopy(self):
         """Start 2 Nodes in the cluster and run the simulation with one client. After some time, start a new node and
         verify that it copies all logs"""
+        self.createNodes(types=[Leader, Follower])
+
+        sleep(1)  # Wait a short time until cluster has started
+
+        self.nodes[1].shutdown()
+        del self.nodes[1]
+
+        client = Client(Coordinate(15, 15), [(self.nodes[0].ipAddress, self.nodes[0].unicastPort)], "localhost", 18011, 1000, 1000, 0)
+        client.start()
+
+        sleep(5)  # Let simulation run for a while.
+
+        self.createSingleNode(2, Follower)
+
+        sleep(10)
+
+
+

@@ -69,11 +69,5 @@ class TestCandidate(unittest.TestCase):
 
         self.candidateNode.state.startElection()
 
-        #self.assertEqual(self.candidateNode.currentTerm, 2)  # ToDo: Not sure why 2 and not 1
         self.assertEqual(self.candidateNode.state.votedFor[self.candidateNode.currentTerm], self.candidateNode.id)
         self.assertEqual(self.candidateNode.state.votesReceived, 1)
-        # self.assertEqual(response.senderID, self.candidateNode.id)
-        # self.assertEqual(response.receiverID, -1)
-        # self.assertEqual(response.term, self.candidateNode.currentTerm)
-        # self.assertEqual(response.lastLogIndex, len(self.candidateNode.log) - 1)
-        # self.assertEqual(response.lastLogTerm, self.candidateNode.log[-1].term if len(self.candidateNode.log) > 0 else -1)

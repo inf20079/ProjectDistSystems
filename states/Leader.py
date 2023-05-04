@@ -67,9 +67,10 @@ class Leader(State):
 
         self.matchIndex[message.senderID] = self.prevLogIndex
         self.nextIndex[message.senderID] = self.node.lastLogIndex() + 1
+        print(message.senderID)
 
-        if self.nextIndex[message.senderID] > self.prevLogIndex:
-            self.nextIndex[message.senderID] = self.prevLogIndex
+        #if self.nextIndex[message.senderID] > self.prevLogIndex:
+        #    self.nextIndex[message.senderID] = self.prevLogIndex
 
         # If there exists an N such that N > commitIndex, a majority of matchIndex[i] >= N,
         # and log[N].term == currentTerm: set commitIndex = N.

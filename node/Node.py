@@ -52,6 +52,9 @@ class Node:
         print(f"Node {id} started with state {self.state}")
 
     def pollMessages(self):
+        if self.unicastInterface is None or self.broadcastInterface is None:
+            return
+
         self.unicastInterface.refresh()
         self.broadcastInterface.refresh()
 
@@ -184,4 +187,6 @@ class Node:
 
     def shutdown(self):
         self.state.shutdown()
+        del self.unicastInterface
+        del self.broadcastInterface
         self.isPeriodicDiscoveryActive = False
