@@ -32,6 +32,7 @@ class UnicastInterface(AbstractSocketInterface):
         sock.bind((self.ip, self.port))
         sock.listen(5)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setblocking(False)
         return sock
 
     def appendMessage(self, message: Unicast):
@@ -74,6 +75,7 @@ class UnicastInterface(AbstractSocketInterface):
 
     def onReadable(self):
         client_socket, addr = self.socket.accept()
+        client_socket.setblocking(True)
         client_thread = threading.Thread(target=self.listenToClient, args=(client_socket,))
         client_thread.start()
         self.clientThreads.append(client_thread)
