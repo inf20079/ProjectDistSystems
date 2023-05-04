@@ -89,8 +89,11 @@ class State:
             i += 1
             j += 1
 
+        if message.entries:
+            print(message.entries)
+
         # Append any new entries not already in the log
-        self.node.log += message.entries[j:]
+        self.node.appendEntriesToLog(message.entries[j:])
 
         print(f"[{self.node.id}](State) onAppendEntries: {self.node.log=}")
 
@@ -130,20 +133,13 @@ class State:
 
     def applyLogAtIndexToStateMachine(self, index: int):
         if index == -1:
-            return
+            return None, None
         try:
-            print("debug", self.node.log[index].action)
-            navigationRequest = NavigationRequest.fromDict(self.node.log[index].action)
+            navigationRequest = self.node.log[index].action
             nextStep = self.node.applyToStateMachine(navigationRequest)
-
-            navigationResponse = NavigationResponse(
-                clientId=navigationRequest.clientId,
-                nextStep=nextStep
-            )
-            self.node.sendMessageUnicast(navigationResponse, host=navigationRequest.clientHost,
-                                         port=navigationRequest.clientPort)
+            return navigationRequest, nextStep
         except TypeError as e:
-            print(f"{e=}")
+            raise e
 
     def shutdown(self):
         """To be overriden"""

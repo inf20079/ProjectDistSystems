@@ -30,7 +30,7 @@ class Map:
     def move(self, new_pos):
 
         if not self.current_pos:
-            print(f"Start pos id {self.current_pos=}. Please set start pos.")
+            self.current_pos = new_pos
             return
 
         # Check if the new position is within the bounds of the board

@@ -15,7 +15,12 @@ from states.Leader import Leader
 class SmokeTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        RecurringProcedure.TIMEOUT_SCALE = 10
+        RecurringProcedure.TIMEOUT_SCALE = 20
+
+        dir = os.getcwd() + os.sep + "temp"
+        filelist = [f for f in os.listdir(dir) if f.endswith(".pkl")]
+        for f in filelist:
+            os.remove(os.path.join(dir, f))
 
     def createNodes(self, types):
         nodeCount = len(types)

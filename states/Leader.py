@@ -34,7 +34,7 @@ class Leader(State):
             action=message
         )
         self.newEntries.append(newEntry)
-        self.node.log.append(newEntry)
+        self.node.appendEntryToLog(newEntry)
 
         return self.__class__, None
 
@@ -47,7 +47,7 @@ class Leader(State):
             self.matchIndex[message.senderID] = 0
 
         if not message.success:  # AppendEntries did not succeed
-            if self.node.prevLogIndex > -1:  # We can actually send a past log (maybe we just shouldn't be the Leader)
+            if self.node.lastLogIndex() > -1:  # We can actually send a past log (maybe we just shouldn't be the Leader)
                 self.nextIndex[message.senderID] = max(0, self.nextIndex[message.senderID] - 1)
 
                 previousIndex = self.nextIndex[message.senderID]
@@ -88,7 +88,13 @@ class Leader(State):
             # AppendEntries-RPC, apply changes to state machine, send response and commit.
             print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Can commit")
             for i in range(self.prevLogIndex, self.node.lastLogIndex() + 1):
-                self.applyLogAtIndexToStateMachine(i)
+                navigationRequest, nextStep = self.applyLogAtIndexToStateMachine(i)
+                navigationResponse = NavigationResponse(
+                    clientId=navigationRequest.clientId,
+                    nextStep=nextStep
+                )
+                self.node.sendMessageUnicast(navigationResponse, host=navigationRequest.clientHost,
+                                             port=navigationRequest.clientPort)
             self.node.commitIndex = self.node.lastLogIndex()  # Commit
             self.node.lastApplied = self.node.commitIndex  # All that Leader commits is also applied
 

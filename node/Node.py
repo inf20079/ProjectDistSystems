@@ -43,11 +43,13 @@ class Node:
         )
 
         self.state = stateClass(self)
-        print(self.state)
 
         # logic
         self.trafficControlLogic = TrafficControlLogic(TrafficArea(2, 1000, 1000))
         self.loadTrafficArea()
+
+
+        print(f"Node {id} started with state {self.state}")
 
     def pollMessages(self):
         self.unicastInterface.refresh()
@@ -86,8 +88,8 @@ class Node:
         self.broadcastInterface.appendMessage(message)
 
     def sendMessageUnicast(self, message: Any, host: str = None, port: int = None):
-        print(f"[{self.id}](Node) sendMessageUnicast: {message.receiverID=}")
         if host is None or port is None:
+            print(f"[{self.id}](Node) sendMessageUnicast: {message.receiverID=}")
             receiver = self.getIpByID(message.receiverID)
             host = receiver.host
             port = receiver.port
@@ -130,13 +132,20 @@ class Node:
         unicast = Unicast(message.member.host, message.member.port)
         self.sendMessageUnicast(unicast)
 
+    def appendEntryToLog(self, logEntry: LogEntry):
+        self.log.append(logEntry)
+        self.saveLog()
+
+    def appendEntriesToLog(self, logEntries: [LogEntry]):
+        self.log += logEntries
+        self.saveLog()
+
     def applyToStateMachine(self, message: NavigationRequest):
         print(f"[{self.id}](Node) applyToStateMachine")
-        if message.currentPosition.x is None or message.currentPosition.y is None:
+        if self.trafficControlLogic.trafficArea.getPosition(message.clientId) is None:
             self.trafficControlLogic.start(message.clientId)
         newCoordinate = self.trafficControlLogic.move(message.clientId, message.destination)
         self.saveTrafficArea()
-        self.saveLog()
         return newCoordinate
 
     def saveTrafficArea(self):

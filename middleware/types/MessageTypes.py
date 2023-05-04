@@ -1,27 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Set
 
-
-@dataclass(frozen=True)
-class LogEntry:
-    term: int
-    action: str
-
-    @classmethod
-    def fromDict(cls, dict):
-        """ object creation from dict
-
-        :param dict: coordinate dataclass as dict
-        :type dict:
-        :return:
-        :rtype: coordinate dataclass
-        """
-        dict["action"] = NavigationRequest(**dict["action"])
-        return cls(**dict)
-
-    def __repr__(self):
-        return f"LogEntry({self.term=}, {self.action=})"
-
 @dataclass(frozen=True)
 class Coordinate:
     """ Coordinate Dataclass
@@ -48,6 +27,80 @@ class Coordinate:
             return True
         else:
             return False
+
+
+@dataclass(frozen=True)
+class NavigationRequest:
+    clientId: int
+    clientHost: str
+    clientPort: int
+    currentPosition: Coordinate
+    destination: Coordinate
+
+    @classmethod
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        try:
+            dict["currentPosition"] = Coordinate(**dict["currentPosition"])
+            dict["destination"] = Coordinate(**dict["destination"])
+            return cls(**dict)
+        except KeyError as e:
+            raise TypeError(str(e))
+
+    def __repr__(self):
+        return f"NavigationRequest({self.clientId=}, {self.clientHost=}, {self.clientPort=}, {self.currentPosition=}, {self.destination=})"
+
+
+@dataclass(frozen=True)
+class NavigationResponse:
+    clientId: int
+    nextStep: Coordinate
+
+    @classmethod
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        try:
+            dict["nextStep"] = Coordinate(**dict["nextStep"])
+            return cls(**dict)
+        except KeyError as e:
+            raise TypeError(str(e))
+
+    def __repr__(self):
+        return f"NavigationResponse({self.clientId=}, {self.nextStep=})"
+
+
+@dataclass(frozen=True)
+class LogEntry:
+    term: int
+    action: NavigationRequest
+
+    @classmethod
+    def fromDict(cls, dict):
+        """ object creation from dict
+
+        :param dict: coordinate dataclass as dict
+        :type dict:
+        :return:
+        :rtype: coordinate dataclass
+        """
+        dict["action"] = NavigationRequest.fromDict(dict["action"])
+        return cls(**dict)
+
+    def __repr__(self):
+        return f"LogEntry({self.term=}, {self.action=})"
+
 
 @dataclass(frozen=False)
 class Message:
@@ -87,7 +140,7 @@ class AppendEntriesRequest(Message):
         :rtype: coordinate dataclass
         """
         try:
-            dict["entries"] = [LogEntry(**entry) for entry in dict["entries"]]
+            dict["entries"] = [LogEntry.fromDict(entry) for entry in dict["entries"]]
             return cls(**dict)
         except KeyError as e:
             raise TypeError(str(e))
@@ -182,55 +235,3 @@ class ResponseDiscover:
             return cls(**dict)
         except KeyError as e:
             raise TypeError(str(e))
-
-
-@dataclass(frozen=True)
-class NavigationRequest:
-    clientId: int
-    clientHost: str
-    clientPort: int
-    currentPosition: Coordinate
-    destination: Coordinate
-
-    @classmethod
-    def fromDict(cls, dict):
-        """ object creation from dict
-
-        :param dict: coordinate dataclass as dict
-        :type dict:
-        :return:
-        :rtype: coordinate dataclass
-        """
-        try:
-            dict["currentPosition"] = Coordinate(**dict["currentPosition"])
-            dict["destination"] = Coordinate(**dict["destination"])
-            return cls(**dict)
-        except KeyError as e:
-            raise TypeError(str(e))
-
-    def __repr__(self):
-        return f"NavigationRequest({self.clientId=}, {self.clientHost=}, {self.clientPort=}, {self.currentPosition=}, {self.destination=})"
-
-
-@dataclass(frozen=True)
-class NavigationResponse:
-    clientId: int
-    nextStep: Coordinate
-
-    @classmethod
-    def fromDict(cls, dict):
-        """ object creation from dict
-
-        :param dict: coordinate dataclass as dict
-        :type dict:
-        :return:
-        :rtype: coordinate dataclass
-        """
-        try:
-            dict["nextStep"] = Coordinate(**dict["nextStep"])
-            return cls(**dict)
-        except KeyError as e:
-            raise TypeError(str(e))
-
-    def __repr__(self):
-        return f"NavigationResponse({self.clientId=}, {self.nextStep=})"
