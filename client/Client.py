@@ -46,9 +46,13 @@ class Client(threading.Thread):
         print(f"[C](Client) onNavigation")
         if message.leader is None and message.nextStep is None:
             self.requestNavigation()
+            return
+
         if message.nextStep is None and message.leader:
             self.requestNavigation(message.leader.host, message.leader.port)
             self.leader = (message.leader.host, message.leader.port)
+            return
+
         self.leader = (message.leader.host, message.leader.port)
         self.currentPosition = message.nextStep
         if self.currentPosition == self.destination:
@@ -56,6 +60,7 @@ class Client(threading.Thread):
         else:
             self.map.move((message.nextStep.x, message.nextStep.y))
             self.requestNavigation(*self.leader)
+
         print(f"[C](Client) At time {self.getTimeDiff()} at position {self.currentPosition}.")
 
     def requestNavigation(self, host: str = None, port: int = None ):

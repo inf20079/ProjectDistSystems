@@ -103,7 +103,7 @@ class State:
             self.node.commitIndex = min(message.commitIndex, self.node.lastLogIndex())
 
         # If commitIndex > lastApplied: increment lastApplied, apply log[lastApplied] to state machine
-        for i in range(self.node.lastApplied, self.node.commitIndex + 1):
+        for i in range(self.node.lastApplied + 1, self.node.commitIndex + 1):
             self.applyLogAtIndexToStateMachine(i)
         self.node.lastApplied = self.node.commitIndex
 

@@ -16,10 +16,10 @@ class TestLogReplication(SmokeTest):
 
         sleep(1)  # Wait a short time until cluster has started
 
-        client = Client(Coordinate(5, 5), [(self.nodes[0].ipAddress, self.nodes[0].unicastPort)], "localhost", 18011, 1000, 1000, 0)
+        client = Client(Coordinate(15, 15), [(self.nodes[0].ipAddress, self.nodes[0].unicastPort)], "localhost", 18011, 1000, 1000, 0)
         client.start()
 
-        sleep(20)  # Let client send a few messages
+        sleep(50)  # Let client send a few messages
 
         maxDuration = 20
         self.checkForDuration(

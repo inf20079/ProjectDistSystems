@@ -76,20 +76,22 @@ class Leader(State):
         canCommit = False
         for N in range(self.node.commitIndex + 1, self.node.lastLogIndex() + 1):
             matchIndexCount = 0
-            for matchIndex in self.matchIndex:
+            for matchIndex in self.matchIndex.values():
                 if matchIndex >= N:
                     matchIndexCount += 1
             majority = matchIndexCount >= len(self.node.peers) // 2
+
+            # print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: {majority=}")
             if majority and self.node.log[N].term == self.node.currentTerm:
                 canCommit = True
                 break
 
+        print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: {canCommit=}")
+
         if canCommit:  # AppendEntries-RPC, apply changes to state machine, send response and commit.
-            print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Can commit")
-            print(self.prevLogIndex)
-            print(self.node.lastLogIndex() + 1)
-            for i in range(self.prevLogIndex, self.node.lastLogIndex() + 1):
+            for i in range(self.node.lastApplied + 1, self.node.lastLogIndex() + 1):
                 navigationRequest, nextStep = self.applyLogAtIndexToStateMachine(i)
+                # print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Applying index {i}")
                 if navigationRequest is None or nextStep is None:
                     continue
 
