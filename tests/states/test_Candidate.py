@@ -16,7 +16,6 @@ class TestCandidate(unittest.TestCase):
         self.candidateNode.state.electionTimeout = 100
 
     def tearDown(self):
-        print("tearDown")
         self.candidateNode.shutdown()
 
     def test_onVoteResponseReceived_higherTerm(self):

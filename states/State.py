@@ -36,20 +36,20 @@ class State:
         elif isinstance(message, AppendEntriesResponse):
             if isinstance(self, Leader):
                 stateClass, response = self.onAppendEntriesResponseReceived(message)
-            else:
-                print(f"[{self.node.id}](State) onMessage / AppendEntriesResponse: instance not a leader")
+            # else:
+            #     print(f"[{self.node.id}](State) onMessage / AppendEntriesResponse: instance not a leader")
         elif isinstance(message, RequestVoteMessage):
             stateClass, response = self.onVoteRequestReceived(message)
         elif isinstance(message, ResponseVoteMessage):
             if isinstance(self, Candidate):
                 stateClass, response = self.onVoteResponseReceived(message)
-            else:
-                print(f"[{self.node.id}](State) onMessage: instance not a candidate")
+            # else:
+            #     print(f"[{self.node.id}](State) onMessage: instance not a candidate")
 
         # If RPC request or response contains term T > currentTerm:
         # convert to follower
         if message.term > prevCurrentTerm:
-            print(f"[{self.node.id}](State) onMessage: message.term > prevCurrentTerm")
+            # print(f"[{self.node.id}](State) onMessage: message.term > prevCurrentTerm")
             if not isinstance(self, Follower):
                 stateClass = Follower
 
@@ -59,13 +59,13 @@ class State:
         return stateClass, response
 
     def onAppendEntries(self, message: AppendEntriesRequest):
-        print(f"[{self.node.id}](State) onAppendEntries")
+        # print(f"[{self.node.id}](State) onAppendEntries")
 
-        print(f"[{self.node.id}](State) onAppendEntries: {message=}")
+        # print(f"[{self.node.id}](State) onAppendEntries: {message=}")
 
         # Reply false if message.term < currentTerm
         if message.term < self.node.currentTerm:
-            print(f"[{self.node.id}](State) onAppendEntries: message.term < self.node.currentTerm")
+            # print(f"[{self.node.id}](State) onAppendEntries: message.term < self.node.currentTerm")
             return self.__class__, self.generateAppendEntriesResponse(message, False)
 
         self.node.currentTerm = message.term
@@ -75,8 +75,8 @@ class State:
             if len(self.node.log) <= message.prevLogIndex or self.node.log[message.prevLogIndex].term != message.prevLogTerm:
                 # The previous log entry doesn't match, so send a
                 # failure response indicating the mismatch
-                print(f"[{self.node.id}](State) onAppendEntries: The previous log entry doesn't match")
-                print(f"[{self.node.id}](State) onAppendEntries: my log is {self.node.log}")
+                # print(f"[{self.node.id}](State) onAppendEntries: The previous log entry doesn't match")
+                # print(f"[{self.node.id}](State) onAppendEntries: my log is {self.node.log}")
                 return self.__class__, self.generateAppendEntriesResponse(message, False)
 
         # If an existing entry conflicts with a new one (same index but different terms),
@@ -93,7 +93,7 @@ class State:
         # Append any new entries not already in the log
         self.node.appendEntriesToLog(message.entries[j:])
 
-        print(f"[{self.node.id}](State) onAppendEntries: {self.node.log=}")
+        # print(f"[{self.node.id}](State) onAppendEntries: {self.node.log=}")
 
         # If leaderCommit > commitIndex, set commitIndex =
         # min(leaderCommit, index of last new entry)
@@ -106,7 +106,7 @@ class State:
         self.node.lastApplied = self.node.commitIndex
 
         # Send a success message
-        print(f"[{self.node.id}](State) onAppendEntries: Success")
+        # print(f"[{self.node.id}](State) onAppendEntries: Success")
         return self.__class__, self.generateAppendEntriesResponse(message, True)
 
     def onVoteRequestReceived(self, message: RequestVoteMessage):

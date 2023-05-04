@@ -1,7 +1,5 @@
 from time import sleep
 
-from client.Client import Client
-from middleware.types.MessageTypes import Coordinate
 from states.Follower import Follower
 from states.Leader import Leader
 from tests.smoketests.SmokeTest import SmokeTest
@@ -75,5 +73,4 @@ class TestLogReplication(SmokeTest):
             maxDuration=maxDuration,
             onFailedText=f"Follower did not replicate the log after {maxDuration} seconds."
         )
-
 

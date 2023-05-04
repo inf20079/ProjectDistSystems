@@ -26,28 +26,28 @@ class Candidate(Voter):
 
         # Check if the message's term is greater than the candidate's current term
         if message.term > self.node.currentTerm:
-            print(f"[{self.node.id}](Candidate) onVoteResponseReceived: higher term")
+            # print(f"[{self.node.id}](Candidate) onVoteResponseReceived: higher term")
             return Follower, None
 
         # If the vote was granted, increment the vote count and check if the candidate
         # has received votes from a majority of the cluster
         if message.voteGranted:
             self.votesReceived += 1
-            print(f"[{self.node.id}](Candidate) onVoteResponseReceived: vote granted")
+            # print(f"[{self.node.id}](Candidate) onVoteResponseReceived: vote granted")
             if self.votesReceived >= len(self.node.peers) // 2:
-                print(f"[{self.node.id}](Candidate) onVoteResponseReceived: majority votes")
+                # print(f"[{self.node.id}](Candidate) onVoteResponseReceived: majority votes")
                 return Leader, None
             return self.__class__, None
 
-        print(f"[{self.node.id}](Candidate) onVoteResponseReceived: vote not granted")
+        # print(f"[{self.node.id}](Candidate) onVoteResponseReceived: vote not granted")
         return self.__class__, None
 
     def onElectionTimeouted(self):
-        print(f"[{self.node.id}](Candidate) onElectionTimeouted")
+        # print(f"[{self.node.id}](Candidate) onElectionTimeouted")
         self.startElection()
 
     def onClientRequestReceived(self, message: NavigationRequest):
-        print(f"[{self.node.id}](Candidate) onClientRequestReceived")
+        # print(f"[{self.node.id}](Candidate) onClientRequestReceived")
         response = NavigationResponse(message.clientId, None, None)
         self.node.sendMessageUnicast(response, message.clientHost, message.clientPort)
 
@@ -56,7 +56,7 @@ class Candidate(Voter):
         and sends RequestVoteRequest messages to all other nodes in the cluster.
         It also resets the election timeout."""
 
-        print(f"[{self.node.id}](Candidate) startElection")
+        # print(f"[{self.node.id}](Candidate) startElection")
 
         # Reset the election timeout
         self.recurringProcedure.resetTimeout()
@@ -65,7 +65,7 @@ class Candidate(Voter):
         self.node.currentTerm += 1
         self.votedFor[self.node.currentTerm] = self.node.id
         self.votesReceived = 1
-        print(f"[{self.node.id}](Candidate) startElection: {self.node.currentTerm=}")
+        # print(f"[{self.node.id}](Candidate) startElection: {self.node.currentTerm=}")
 
         # Send RequestVoteMessage messages to all other nodes in the cluster
         requestVoteMessage = RequestVoteMessage(

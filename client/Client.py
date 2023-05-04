@@ -50,7 +50,7 @@ class Client(threading.Thread):
         print(f"Client {self.id}: Reached destination in: {self.getTimeDiff()}")
 
     def onNavigation(self, message: NavigationResponse):
-        print(f"[C](Client) onNavigation")
+        # print(f"[C](Client) onNavigation")
         if message.leader is None and message.nextStep is None:
             self.requestNavigation()
             return
@@ -71,7 +71,7 @@ class Client(threading.Thread):
         print(f"[C](Client) At time {self.getTimeDiff()} at position {self.currentPosition}.")
 
     def requestNavigation(self, host: str = None, port: int = None ):
-        print(f"[C](Client) Request Navigation")
+        # print(f"[C](Client) Request Navigation")
         if host and port:
             # print(host, port)
             serverAdress = (host, port)

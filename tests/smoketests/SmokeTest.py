@@ -68,11 +68,14 @@ class SmokeTest(unittest.TestCase):
     def getNodeByID(self, nodeID):
         return [node for node in self.nodes if node.id == nodeID][0]
 
-    def createAndStartClient(self, clientCount):
-        self.clients = []
+    def createAndStartClient(self, clientCount: int, destinations: [Coordinate] = None):
+        if not hasattr(self, "clients"):
+            self.clients = []
         for i in range(0, clientCount):
-            client = Client(Coordinate(15, 15), [(self.nodes[1].ipAddress, self.nodes[1].unicastPort)], "localhost", 18011,
-                            1000, 1000, 0)
+            client = Client(destinations[i] if destinations and i < len(destinations) else Coordinate(15, 15),
+                            [(node.ipAddress, node.unicastPort) for node in self.nodes],
+                            "localhost", 18011 + i,
+                            1000, 1000, i)
             client.start()
             self.clients.append(client)
 

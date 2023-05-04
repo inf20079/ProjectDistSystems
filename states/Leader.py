@@ -27,7 +27,7 @@ class Leader(State):
         self.recurringProcedure.start()
 
     def onClientRequestReceived(self, message: NavigationRequest):
-        print(f"[{self.node.id}](Leader) onClientRequestReceived: {message}")
+        # print(f"[{self.node.id}](Leader) onClientRequestReceived: {message}")
 
         newEntry = LogEntry(
             term=self.node.currentTerm,
@@ -39,11 +39,11 @@ class Leader(State):
         return self.__class__, None
 
     def onAppendEntriesResponseReceived(self, message: AppendEntriesResponse):
-        print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: {message}")
+        # print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: {message}")
 
         if message.senderID not in self.nextIndex.keys():
             self.nextIndex[message.senderID] = self.node.lastLogIndex() + 1
-            print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Setting nextIndex={self.nextIndex[message.senderID]} for {message.senderID=}")
+            # print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Setting nextIndex={self.nextIndex[message.senderID]} for {message.senderID=}")
         if message.senderID not in self.matchIndex.keys():
             self.matchIndex[message.senderID] = 0
 
@@ -59,7 +59,7 @@ class Leader(State):
 
                 logsToSend = self.node.log[self.nextIndex[message.senderID]:]
 
-                print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Sending previous log with {previousIndex=} and {self.nextIndex[message.senderID]=}: {logsToSend}")
+                # print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: Sending previous log with {previousIndex=} and {self.nextIndex[message.senderID]=}: {logsToSend}")
 
                 appendEntry = AppendEntriesRequest(
                     senderID=self.node.id,
@@ -93,7 +93,7 @@ class Leader(State):
                 canCommit = True
                 break
 
-        print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: {canCommit=}")
+        # print(f"[{self.node.id}](Leader) onAppendEntriesResponseReceived: {canCommit=}")
 
         if canCommit:  # AppendEntries-RPC, apply changes to state machine, send response and commit.
             for i in range(self.node.lastApplied + 1, self.node.lastLogIndex() + 1):

@@ -87,12 +87,12 @@ class Node:
         return self.log[-1].term if len(self.log) > 0 else 0
 
     def sendMessageBroadcast(self, message: Any):
-        print(f"[{self.id}](Node) sendMessageBroadcast")
+        # print(f"[{self.id}](Node) sendMessageBroadcast")
         self.broadcastInterface.appendMessage(message)
 
     def sendMessageUnicast(self, message: Any, host: str = None, port: int = None):
         if host is None or port is None:
-            print(f"[{self.id}](Node) sendMessageUnicast: {message.receiverID=}")
+            # print(f"[{self.id}](Node) sendMessageUnicast: {message.receiverID=}")
             receiver = self.getIpByID(message.receiverID)
             host = receiver.host
             port = receiver.port
@@ -144,7 +144,7 @@ class Node:
         self.saveLog()
 
     def applyToStateMachine(self, message: NavigationRequest):
-        print(f"[{self.id}](Node) applyToStateMachine")
+        # print(f"[{self.id}](Node) applyToStateMachine: {message.clientId=}, {message.currentPosition=}")
         if self.trafficControlLogic.trafficArea.getPosition(message.clientId) is None:
             self.trafficControlLogic.start(message.clientId)
         newCoordinate = self.trafficControlLogic.move(message.clientId, message.destination)
